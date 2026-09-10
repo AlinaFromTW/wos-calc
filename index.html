@@ -333,6 +333,16 @@
             color: white;
             border-color: #0284c7;
         }
+        .shortcut-btn.btn-epic {
+            background: #faf5ff;
+            color: #7e22ce;
+            border-color: #d8b4fe;
+        }
+        .shortcut-btn.btn-epic:hover {
+            background: #a855f7;
+            color: #ffffff;
+            border-color: #9333ea;
+        }
         .shortcut-btn.btn-gold {
             background: #fef9c3;
             color: #854d0e;
@@ -729,6 +739,7 @@
                 <span class="shortcuts-title">⚡ 快速跳轉：</span>
                 <button type="button" class="shortcut-btn" @click="setTargetGearOffset(1)">+1 階</button>
                 <button type="button" class="shortcut-btn" @click="setTargetGearOffset(4)">+1 星</button>
+                <button type="button" class="shortcut-btn btn-epic" @click="setTargetGearQuality('史詩')">🟣 史詩</button>
                 <button type="button" class="shortcut-btn btn-gold" @click="setTargetGearQuality('傳說')">🟡 傳說</button>
                 <button type="button" class="shortcut-btn btn-mythic" @click="setTargetGearQuality('神話T1')">🔴 神話T1</button>
                 <button type="button" class="shortcut-btn btn-mythic" @click="setTargetGearQuality('神話T2')">🔴 神話T2</button>
