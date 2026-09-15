@@ -4897,26 +4897,6 @@ createApp({
             statusType.value = type
         }
 
-        const loadUserSave = async (silent = false) => {
-            const pid = (playerId.value || '').trim()
-            if (!pid) {
-                if (!silent) showNotification('請先輸入遊戲 ID！', 'error')
-                return
-            }
-            isLoading.value = true
-            try {
-                const res = await fetch(`/api/user?player_id=${encodeURIComponent(pid)}`)
-                const data = await res.json()
-                if (data.whitelisted) {
-                    isWhitelisted.value = true
-                    if (data.player_name) playerName.value = data.player_name
-                    if (data.updated_at) lastUpdated.value = data.updated_at
-                    
-                    if (data.data) {
-                        const d = data.data
-                        if (d.activeTab) activeTab.value = d.activeTab
-                        if (d.gearMode) gearMode.value = d.gearMode
-                        if (d.gearMultiplier) gearMultiplier.value = d.gearMultiplier
         // Helper for local fallback storage
         const getLocalWhitelist = () => {
             try { 
@@ -5147,15 +5127,15 @@ createApp({
                 return
             }
 
-            // 預設管理密碼 ilove2156 立即通過
-            if (inputPwd === 'ilove2156') {
+            // 預設管理密碼 alina5085 立即通過
+            if (inputPwd === 'alina5085') {
                 isAdminLoggedIn.value = true
                 fetchWhitelist()
                 return
             }
 
             if (isStaticHost) {
-                adminLoginErr.value = '管理密碼錯誤 (預設密碼為 ilove2156)'
+                adminLoginErr.value = '管理密碼錯誤 (預設密碼為 alina5085)'
                 return
             }
 
@@ -5175,14 +5155,14 @@ createApp({
                 }
                 adminLoginErr.value = '管理密碼錯誤'
             } catch (err) {
-                adminLoginErr.value = '管理密碼錯誤 (預設密碼為 ilove2156)'
+                adminLoginErr.value = '管理密碼錯誤 (預設密碼為 alina5085)'
             }
         }
 
         const fetchWhitelist = async () => {
             if (!isStaticHost) {
                 try {
-                    const res = await fetch(`/api/admin/whitelist?admin_pass=${encodeURIComponent(adminPassInput.value || 'ilove2156')}`)
+                    const res = await fetch(`/api/admin/whitelist?admin_pass=${encodeURIComponent(adminPassInput.value || 'alina5085')}`)
                     if (res.ok) {
                         const data = await res.json()
                         if (data.success) {
@@ -5214,7 +5194,7 @@ createApp({
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            admin_pass: adminPassInput.value || 'ilove2156',
+                            admin_pass: adminPassInput.value || 'alina5085',
                             player_id: pid,
                             player_name: newWlName.value.trim(),
                             note: newWlNote.value.trim()
@@ -5261,7 +5241,7 @@ createApp({
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            admin_pass: adminPassInput.value || 'ilove2156',
+                            admin_pass: adminPassInput.value || 'alina5085',
                             player_id: pid
                         })
                     })

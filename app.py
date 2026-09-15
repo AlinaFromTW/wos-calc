@@ -11,7 +11,7 @@ if sys.platform.startswith('win'):
 app = Flask(__name__, static_folder='.', static_url_path='')
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "wos_calc_secret_key_2026")
 
-ADMIN_PASS = os.environ.get("ADMIN_PASS", "ilove2156")
+ADMIN_PASS = os.environ.get("ADMIN_PASS", "alina5085")
 
 # ================= 資料庫核心設定 (支援本地 SQLite 與雲端 Supabase PostgreSQL) =================
 def get_db():
