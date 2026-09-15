@@ -597,6 +597,178 @@
         .btn-secondary { background-color: #64748b; }
         .btn-secondary:hover { background-color: #475569; }
 
+        /* Account & Cloud Sync Bar */
+        .account-bar {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 16px;
+            padding: 16px 20px;
+            color: #ffffff;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(15,23,42,0.15);
+            border: 1px solid #334155;
+        }
+        .account-bar-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .account-title {
+            font-size: 16px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #38bdf8;
+        }
+        .account-inputs-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1.2fr auto auto auto;
+            gap: 10px;
+            align-items: center;
+        }
+        .acc-input {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1.5px solid #475569;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 14.5px;
+            font-weight: 700;
+            outline: none;
+            width: 100%;
+        }
+        .acc-input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56,189,248,0.25);
+        }
+        .acc-btn {
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 42px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .acc-btn-load {
+            background: #0284c7;
+            color: #ffffff;
+        }
+        .acc-btn-load:hover { background: #0369a1; }
+        .acc-btn-save {
+            background: #10b981;
+            color: #ffffff;
+        }
+        .acc-btn-save:hover { background: #059669; }
+        .acc-btn-admin {
+            background: #475569;
+            color: #f1f5f9;
+        }
+        .acc-btn-admin:hover { background: #64748b; }
+        .acc-status-row {
+            margin-top: 10px;
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .acc-status-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 12.5px;
+        }
+        .acc-badge-ok { background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4); }
+        .acc-badge-warn { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
+        .acc-badge-err { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.4); }
+
+        /* Amber to Blueprint Converter Option Box */
+        .amber-convert-box {
+            background: #fffbeb;
+            border: 2px dashed #f59e0b;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .amber-convert-label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+            font-size: 15px;
+            font-weight: 800;
+            color: #92400e;
+        }
+        .amber-convert-input {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            accent-color: #d97706;
+        }
+
+        /* Modal dialog */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-card {
+            background: #ffffff;
+            border-radius: 18px;
+            width: 100%;
+            max-width: 680px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3);
+            border: 1px solid #e2e8f0;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        .modal-title { font-size: 20px; font-weight: 900; color: #0f172a; }
+        .modal-close-btn {
+            background: #f1f5f9;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            color: #64748b;
+        }
+
         /* MOBILE RWD MEDIA QUERIES */
         @media (max-width: 768px) {
             body { padding: 12px 10px calc(16px + env(safe-area-inset-bottom)) 10px; }
@@ -604,6 +776,10 @@
             .brand-title { font-size: 22px; }
             .brand-subtitle { font-size: 13px; }
             .card { padding: 18px 14px; border-radius: 14px; margin-bottom: 14px; }
+            .account-inputs-grid {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
             .stage-selector-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
@@ -641,6 +817,51 @@
 <body>
 
 <div class="container" id="app" v-cloak>
+    <!-- Account & Cloud Sync Bar -->
+    <div class="account-bar">
+        <div class="account-bar-top">
+            <div class="account-title">
+                <span style="font-size: 20px;">👤</span>
+                <span>盟友存檔中心 (雲端儲存與進度同步)</span>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <span v-if="isWhitelisted === true" class="acc-status-badge acc-badge-ok">✅ 已開通存檔權限</span>
+                <span v-else-if="isWhitelisted === false" class="acc-status-badge acc-badge-warn">⚠️ 未開通存檔權限</span>
+                <button type="button" class="acc-btn acc-btn-admin" @click="openAdminModal">
+                    ⚙️ 管理者設定
+                </button>
+            </div>
+        </div>
+        <div class="account-inputs-grid">
+            <div>
+                <input type="text" v-model.trim="playerId" placeholder="請輸入遊戲 ID (例: 12345678)" class="acc-input" @keyup.enter="loadUserSave(false)">
+            </div>
+            <div>
+                <input type="text" v-model.trim="playerName" placeholder="角色名稱 / 暱稱 (選填)" class="acc-input" @keyup.enter="saveUserSave">
+            </div>
+            <div>
+                <button type="button" class="acc-btn acc-btn-load" :disabled="isLoading" @click="loadUserSave(false)">
+                    <span v-if="isLoading">⏳ 讀取中...</span>
+                    <span v-else>🔍 載入進度</span>
+                </button>
+            </div>
+            <div>
+                <button type="button" class="acc-btn acc-btn-save" :disabled="isSaving" @click="saveUserSave">
+                    <span v-if="isSaving">💾 儲存中...</span>
+                    <span v-else>💾 儲存進度</span>
+                </button>
+            </div>
+        </div>
+        <div class="acc-status-row" v-if="statusMsg">
+            <div :class="statusType === 'success' ? 'val-ok' : (statusType === 'error' ? 'val-lack' : 'acc-badge-warn')" style="font-weight: 800;">
+                {{ statusMsg }}
+            </div>
+            <div v-if="lastUpdated" style="color: #94a3b8; font-size: 12px;">
+                最後同步時間：{{ lastUpdated }}
+            </div>
+        </div>
+    </div>
+
     <!-- Top Header -->
     <div class="top-header">
         <div class="header-title-box">
@@ -892,6 +1113,25 @@
                     </div>
                 </div>
 
+                <!-- 琥珀自動兌換圖紙選項列 -->
+                <div class="amber-convert-box" style="grid-column: 1 / -1;">
+                    <label class="amber-convert-label">
+                        <input type="checkbox" v-model="autoConvertAmber" class="amber-convert-input">
+                        <span>🔄 啟用琥珀自動折算為設計圖紙（1 個琥珀 = 10 張設計圖紙）</span>
+                    </label>
+                    <div style="font-size: 13.5px; color: #92400e; font-weight: 800;">
+                        <template v-if="autoConvertAmber && gearResult.rawAmberNeeded > 0">
+                            ✨ 已自動將 {{ gearResult.rawAmberNeeded }} 琥珀折算為 +{{ formatNumber(gearResult.rawAmberNeeded * 10) }} 張設計圖紙！
+                        </template>
+                        <template v-else-if="autoConvertAmber">
+                            ✨ 已啟用自動折算（目前目標階段無需琥珀）
+                        </template>
+                        <template v-else>
+                            💡 勾選後會將琥珀需求量 × 10 直接累加至設計圖紙
+                        </template>
+                    </div>
+                </div>
+
                 <!-- 設計圖紙 -->
                 <div class="mat-card" :class="gearResult.blueprint.diff <= 0 ? 'is-ready' : 'is-short'">
                     <div class="mat-card-header">
@@ -910,7 +1150,12 @@
                     </div>
                     <div class="mat-row">
                         <span class="lbl">升級需要：</span>
-                        <span class="val">{{ formatNumber(gearResult.blueprint.needed) }}</span>
+                        <div style="text-align: right;">
+                            <span class="val">{{ formatNumber(gearResult.blueprint.needed) }}</span>
+                            <div v-if="autoConvertAmber && gearResult.rawAmberNeeded > 0" style="font-size: 12px; color: #b45309; font-weight: 800; margin-top: 1px;">
+                                (原需 {{ formatNumber(gearResult.rawBlueprintNeeded) }} + 琥珀折算 {{ formatNumber(gearResult.rawAmberNeeded * 10) }})
+                            </div>
+                        </div>
                     </div>
                     <div class="mat-row">
                         <span class="lbl">背包庫存：</span>
@@ -933,7 +1178,7 @@
                 </div>
 
                 <!-- 月光琥珀 -->
-                <div class="mat-card" :class="gearResult.amber.diff <= 0 ? 'is-ready' : 'is-short'">
+                <div class="mat-card" :class="(autoConvertAmber || gearResult.amber.diff <= 0) ? 'is-ready' : 'is-short'">
                     <div class="mat-card-header">
                         <div class="mat-name-box">
                             <div class="mat-icon-wrapper">
@@ -944,13 +1189,19 @@
                                 <div style="font-size: 12px; color: #64748b;">神話紅裝必備突破材料</div>
                             </div>
                         </div>
-                        <span class="status-badge" :class="gearResult.amber.diff <= 0 ? 'badge-ready' : 'badge-short'">
-                            {{ gearResult.amber.diff <= 0 ? '✅ 充足' : '⚠️ 缺料' }}
+                        <span class="status-badge" :class="autoConvertAmber ? 'badge-ready' : (gearResult.amber.diff <= 0 ? 'badge-ready' : 'badge-short')">
+                            <template v-if="autoConvertAmber">🔄 已折算為圖紙</template>
+                            <template v-else>{{ gearResult.amber.diff <= 0 ? '✅ 充足' : '⚠️ 缺料' }}</template>
                         </span>
                     </div>
                     <div class="mat-row">
                         <span class="lbl">升級需要：</span>
-                        <span class="val">{{ formatNumber(gearResult.amber.needed) }}</span>
+                        <div style="text-align: right;">
+                            <span class="val">{{ formatNumber(gearResult.amber.needed) }}</span>
+                            <div v-if="autoConvertAmber && gearResult.rawAmberNeeded > 0" style="font-size: 12px; color: #15803d; font-weight: 800; margin-top: 1px;">
+                                (原需 {{ formatNumber(gearResult.rawAmberNeeded) }}，已折算為 {{ formatNumber(gearResult.rawAmberNeeded * 10) }} 圖紙)
+                            </div>
+                        </div>
                     </div>
                     <div class="mat-row">
                         <span class="lbl">背包庫存：</span>
@@ -958,17 +1209,20 @@
                     </div>
                     <div class="diff-box">
                         <span class="diff-lbl">差額結果：</span>
-                        <span class="diff-val" :class="gearResult.amber.diff <= 0 ? 'val-ok' : 'val-lack'">
-                            <template v-if="gearResult.amber.diff <= 0">多出 +{{ formatNumber(Math.abs(gearResult.amber.diff)) }}</template>
+                        <span class="diff-val" :class="(autoConvertAmber || gearResult.amber.diff <= 0) ? 'val-ok' : 'val-lack'">
+                            <template v-if="autoConvertAmber">
+                                <span style="color: #10b981;">已由圖紙完全替代</span>
+                            </template>
+                            <template v-else-if="gearResult.amber.diff <= 0">多出 +{{ formatNumber(Math.abs(gearResult.amber.diff)) }}</template>
                             <template v-else>還差 -{{ formatNumber(gearResult.amber.diff) }}</template>
                         </span>
                     </div>
                     <div class="progress-bg">
-                        <div class="progress-fill" :class="{full: gearResult.amber.diff <= 0}" :style="{width: gearResult.amber.percent + '%'}"></div>
+                        <div class="progress-fill" :class="{full: autoConvertAmber || gearResult.amber.diff <= 0}" :style="{width: (autoConvertAmber ? 100 : gearResult.amber.percent) + '%'}"></div>
                     </div>
                     <div class="progress-txt">
-                        <span>進度：{{ gearResult.amber.percent }}%</span>
-                        <span v-if="gearResult.amber.diff <= 0" style="color: #10b981;">已達標</span>
+                        <span>進度：{{ autoConvertAmber ? 100 : gearResult.amber.percent }}%</span>
+                        <span v-if="autoConvertAmber || gearResult.amber.diff <= 0" style="color: #10b981;">已達標</span>
                     </div>
                 </div>
             </div>
@@ -1304,6 +1558,81 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Whitelist Modal -->
+    <div class="modal-overlay" v-if="showAdminModal" @click.self="showAdminModal = false">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title">⚙️ 盟友存檔白名單管理</div>
+                <button type="button" class="modal-close-btn" @click="showAdminModal = false">✕</button>
+            </div>
+
+            <!-- Login Box if not authenticated -->
+            <div v-if="!isAdminLoggedIn">
+                <p style="color: #64748b; font-size: 14px; margin-bottom: 12px;">此功能僅供管理者使用，請輸入管理密碼以管理白名單：</p>
+                <div style="display: flex; gap: 8px;">
+                    <input type="password" v-model="adminPassInput" placeholder="請輸入管理密碼" class="large-select" style="flex: 1;" @keyup.enter="loginAdmin">
+                    <button type="button" class="btn-action" style="background:#0284c7;" @click="loginAdmin">登入後台</button>
+                </div>
+                <div v-if="adminLoginErr" style="color: #ef4444; font-weight: 800; font-size: 13px; margin-top: 8px;">
+                    {{ adminLoginErr }}
+                </div>
+            </div>
+
+            <!-- Admin Whitelist Content when logged in -->
+            <div v-else>
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px; margin-bottom: 16px;">
+                    <h4 style="font-weight: 800; font-size: 15px; margin-bottom: 10px; color: #0f172a;">➕ 新增授權遊戲 ID</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 8px; align-items: center;">
+                        <input type="text" v-model.trim="newWlId" placeholder="遊戲 ID (必填)" class="acc-input" style="background: #fff; color: #0f172a; border-color: #cbd5e1;">
+                        <input type="text" v-model.trim="newWlName" placeholder="角色名稱" class="acc-input" style="background: #fff; color: #0f172a; border-color: #cbd5e1;">
+                        <input type="text" v-model.trim="newWlNote" placeholder="備註 (例: 二隊主力)" class="acc-input" style="background: #fff; color: #0f172a; border-color: #cbd5e1;">
+                        <button type="button" class="acc-btn acc-btn-save" @click="addWhitelistItem">新增</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-weight: 800; font-size: 15px; color: #0f172a;">📋 目前已授權白名單 (共 {{ whitelistList.length }} 人)</span>
+                    <button type="button" class="btn-action btn-secondary" style="padding: 4px 10px; font-size: 12px;" @click="fetchWhitelist">🔄 重新整理</button>
+                </div>
+
+                <div class="table-responsive" style="max-height: 360px; overflow-y: auto; margin-top: 0;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>遊戲 ID</th>
+                                <th>角色名稱</th>
+                                <th>備註</th>
+                                <th>存檔狀態</th>
+                                <th>最後更新</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="item in whitelistList" :key="item.player_id">
+                                <td style="font-weight: 800; color: #0284c7;">{{ item.player_id }}</td>
+                                <td>{{ item.player_name || '-' }}</td>
+                                <td>{{ item.note || '-' }}</td>
+                                <td>
+                                    <span v-if="item.has_save" class="status-badge badge-ready">已建檔</span>
+                                    <span v-else class="status-badge" style="background:#f1f5f9; color:#64748b;">未存檔</span>
+                                </td>
+                                <td style="font-size: 12.5px; color: #64748b;">{{ item.updated_at || '-' }}</td>
+                                <td>
+                                    <button type="button" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:4px 8px; border-radius:6px; font-size:12px; font-weight:800; cursor:pointer;" @click="deleteWhitelistItem(item.player_id)">刪除</button>
+                                </td>
+                            </tr>
+                            <tr v-if="whitelistList.length === 0">
+                                <td colspan="6" style="text-align: center; color: #94a3b8; padding: 20px;">
+                                    目前白名單為空，請由上方輸入遊戲 ID 新增。
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -4535,6 +4864,233 @@ createApp({
             }
         }
 
+        // Auto-convert amber to blueprint switch
+        const savedAutoConvert = localStorage.getItem('wos_auto_convert_amber')
+        const autoConvertAmber = ref(savedAutoConvert === 'true')
+
+        watch(autoConvertAmber, (v) => {
+            try { localStorage.setItem('wos_auto_convert_amber', v ? 'true' : 'false') } catch(e){}
+        })
+
+        // Account & Cloud Sync State
+        const playerId = ref(localStorage.getItem('wos_player_id') || '')
+        const playerName = ref(localStorage.getItem('wos_player_name') || '')
+        const isWhitelisted = ref(null) // null = unchecked, true, false
+        const lastUpdated = ref('')
+        const statusMsg = ref('')
+        const statusType = ref('info')
+        const isLoading = ref(false)
+        const isSaving = ref(false)
+
+        // Admin Whitelist Modal State
+        const showAdminModal = ref(false)
+        const isAdminLoggedIn = ref(false)
+        const adminPassInput = ref('')
+        const adminLoginErr = ref('')
+        const whitelistList = ref([])
+        const newWlId = ref('')
+        const newWlName = ref('')
+        const newWlNote = ref('')
+
+        const showNotification = (msg, type = 'info') => {
+            statusMsg.value = msg
+            statusType.value = type
+        }
+
+        const loadUserSave = async (silent = false) => {
+            const pid = (playerId.value || '').trim()
+            if (!pid) {
+                if (!silent) showNotification('請先輸入遊戲 ID！', 'error')
+                return
+            }
+            isLoading.value = true
+            try {
+                const res = await fetch(`/api/user?player_id=${encodeURIComponent(pid)}`)
+                const data = await res.json()
+                if (data.whitelisted) {
+                    isWhitelisted.value = true
+                    if (data.player_name) playerName.value = data.player_name
+                    if (data.updated_at) lastUpdated.value = data.updated_at
+                    
+                    if (data.data) {
+                        const d = data.data
+                        if (d.activeTab) activeTab.value = d.activeTab
+                        if (d.gearMode) gearMode.value = d.gearMode
+                        if (d.gearMultiplier) gearMultiplier.value = d.gearMultiplier
+                        if (d.gemsMultiplier) gemsMultiplier.value = d.gemsMultiplier
+                        if (d.selectedCurrentGearId !== undefined) selectedCurrentGearId.value = d.selectedCurrentGearId
+                        if (d.selectedTargetGearId !== undefined) selectedTargetGearId.value = d.selectedTargetGearId
+                        if (d.selectedCurrentGemId !== undefined) selectedCurrentGemId.value = d.selectedCurrentGemId
+                        if (d.selectedTargetGemId !== undefined) selectedTargetGemId.value = d.selectedTargetGemId
+                        if (d.gearSlots) gearSlots.value = d.gearSlots
+                        if (d.gearInv) gearInv.value = d.gearInv
+                        if (d.gemInv) gemInv.value = d.gemInv
+                        if (typeof d.autoConvertAmber === 'boolean') autoConvertAmber.value = d.autoConvertAmber
+                        
+                        showNotification(data.msg || `歡迎回來 ${playerName.value || pid}，已載入存檔！`, 'success')
+                    } else {
+                        showNotification(data.msg || `已通過白名單授權！可點擊「儲存進度」保存數值。`, 'info')
+                    }
+                    localStorage.setItem('wos_player_id', pid)
+                    if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
+                } else {
+                    isWhitelisted.value = false
+                    showNotification(data.msg || '⚠️ 此遊戲 ID 尚未開通存檔權限，請聯絡管理員', 'error')
+                }
+            } catch (err) {
+                console.error(err)
+                if (!silent) showNotification('連線伺服器失敗，請檢查後端是否正在運行', 'error')
+            } finally {
+                isLoading.value = false
+            }
+        }
+
+        const saveUserSave = async () => {
+            const pid = (playerId.value || '').trim()
+            if (!pid) {
+                showNotification('請先輸入遊戲 ID 才能儲存！', 'error')
+                return
+            }
+            isSaving.value = true
+            const payload = {
+                player_id: pid,
+                player_name: playerName.value || pid,
+                data: {
+                    activeTab: activeTab.value,
+                    gearMode: gearMode.value,
+                    gearMultiplier: gearMultiplier.value,
+                    gemsMultiplier: gemsMultiplier.value,
+                    selectedCurrentGearId: selectedCurrentGearId.value,
+                    selectedTargetGearId: selectedTargetGearId.value,
+                    selectedCurrentGemId: selectedCurrentGemId.value,
+                    selectedTargetGemId: selectedTargetGemId.value,
+                    gearSlots: gearSlots.value,
+                    gearInv: gearInv.value,
+                    gemInv: gemInv.value,
+                    autoConvertAmber: autoConvertAmber.value
+                }
+            }
+            try {
+                const res = await fetch('/api/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                const data = await res.json()
+                if (data.success) {
+                    isWhitelisted.value = true
+                    lastUpdated.value = data.updated_at || new Date().toLocaleString()
+                    showNotification(data.msg || '進度已成功儲存至雲端！', 'success')
+                    localStorage.setItem('wos_player_id', pid)
+                    if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
+                } else {
+                    if (res.status === 403) isWhitelisted.value = false
+                    showNotification(data.msg || '儲存失敗，未獲授權', 'error')
+                }
+            } catch (err) {
+                console.error(err)
+                showNotification('儲存失敗：連線伺服器異常', 'error')
+            } finally {
+                isSaving.value = false
+            }
+        }
+
+        // Admin methods
+        const openAdminModal = () => {
+            showAdminModal.value = true
+            adminLoginErr.value = ''
+            if (isAdminLoggedIn.value) {
+                fetchWhitelist()
+            }
+        }
+
+        const loginAdmin = async () => {
+            adminLoginErr.value = ''
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: adminPassInput.value })
+                })
+                const data = await res.json()
+                if (data.success) {
+                    isAdminLoggedIn.value = true
+                    fetchWhitelist()
+                } else {
+                    adminLoginErr.value = data.msg || '管理密碼錯誤'
+                }
+            } catch (err) {
+                adminLoginErr.value = '登入失敗：連線伺服器異常'
+            }
+        }
+
+        const fetchWhitelist = async () => {
+            try {
+                const res = await fetch(`/api/admin/whitelist?admin_pass=${encodeURIComponent(adminPassInput.value)}`)
+                const data = await res.json()
+                if (data.success) {
+                    whitelistList.value = data.whitelist || []
+                }
+            } catch (err) {
+                console.error(err)
+            }
+        }
+
+        const addWhitelistItem = async () => {
+            const pid = (newWlId.value || '').trim()
+            if (!pid) return alert('請輸入遊戲 ID')
+            try {
+                const res = await fetch('/api/admin/whitelist/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_pass: adminPassInput.value,
+                        player_id: pid,
+                        player_name: newWlName.value.trim(),
+                        note: newWlNote.value.trim()
+                    })
+                })
+                const data = await res.json()
+                if (data.success) {
+                    newWlId.value = ''
+                    newWlName.value = ''
+                    newWlNote.value = ''
+                    fetchWhitelist()
+                } else {
+                    alert(data.msg || '新增失敗')
+                }
+            } catch (err) {
+                alert('連線失敗')
+            }
+        }
+
+        const deleteWhitelistItem = async (pid) => {
+            if (!confirm(`確定要從白名單移除遊戲 ID: ${pid} 嗎？`)) return
+            try {
+                const res = await fetch('/api/admin/whitelist/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_pass: adminPassInput.value,
+                        player_id: pid
+                    })
+                })
+                const data = await res.json()
+                if (data.success) {
+                    fetchWhitelist()
+                } else {
+                    alert(data.msg || '刪除失敗')
+                }
+            } catch (err) {
+                alert('連線失敗')
+            }
+        }
+
+        // Auto load if playerId saved in localStorage
+        if (playerId.value) {
+            loadUserSave(true)
+        }
+
         // Inventory with localStorage persistence
         const savedGearInv = localStorage.getItem('wos_gear_inventory')
         const gearInv = ref(savedGearInv ? JSON.parse(savedGearInv) : { alloy: 0, polishing: 0, blueprint: 0, amber: 0 })
@@ -4586,6 +5142,18 @@ createApp({
                     }
                 }
             }
+
+            const rawAmberNeeded = totalAmber
+            const rawBlueprintNeeded = totalBlueprint
+
+            let effectiveBlueprint = totalBlueprint
+            let effectiveAmber = totalAmber
+
+            if (autoConvertAmber.value) {
+                effectiveBlueprint = totalBlueprint + (totalAmber * 10)
+                effectiveAmber = 0
+            }
+
             const calcItem = (needed, have) => {
                 const inv = Number(have) || 0
                 const diff = needed - inv
@@ -4593,10 +5161,12 @@ createApp({
                 return { needed, have: inv, diff, percent }
             }
             return {
+                rawAmberNeeded,
+                rawBlueprintNeeded,
                 alloy: calcItem(totalAlloy, gearInv.value.alloy),
                 polishing: calcItem(totalPolishing, gearInv.value.polishing),
-                blueprint: calcItem(totalBlueprint, gearInv.value.blueprint),
-                amber: calcItem(totalAmber, gearInv.value.amber)
+                blueprint: calcItem(effectiveBlueprint, gearInv.value.blueprint),
+                amber: calcItem(effectiveAmber, gearInv.value.amber)
             }
         })
 
@@ -4713,7 +5283,11 @@ createApp({
             gearSlots, enabledSlotsCount, selectPresetSlots, gearInv, gemInv, formatNumber,
             currentGearStage, targetGearStage, activeGearSteps, gearResult, gearGainAttr, gearGainPower, gearGainCapacity,
             setTargetGearOffset, setTargetGearQuality, syncAllGearSlots, clearGearInv,
-            currentGemStage, targetGemStage, activeGemSteps, gemResult, setTargetGemOffset, setTargetGemLevel, clearGemInv
+            currentGemStage, targetGemStage, activeGemSteps, gemResult, setTargetGemOffset, setTargetGemLevel, clearGemInv,
+            autoConvertAmber, playerId, playerName, isWhitelisted, lastUpdated, statusMsg, statusType, isLoading, isSaving,
+            loadUserSave, saveUserSave,
+            showAdminModal, isAdminLoggedIn, adminPassInput, adminLoginErr, whitelistList, newWlId, newWlName, newWlNote,
+            openAdminModal, loginAdmin, fetchWhitelist, addWhitelistItem, deleteWhitelistItem
         }
     }
 }).mount('#app')
