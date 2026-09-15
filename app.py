@@ -3,6 +3,10 @@ import sys
 import json
 import datetime
 from flask import Flask, send_from_directory, request, jsonify, session
+try:
+    from flask_cors import CORS
+except ImportError:
+    CORS = None
 
 # Force UTF-8 stdout on Windows
 if sys.platform.startswith('win'):
@@ -10,6 +14,8 @@ if sys.platform.startswith('win'):
 
 app = Flask(__name__, static_folder='.', static_url_path='')
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "wos_calc_secret_key_2026")
+if CORS:
+    CORS(app)
 
 ADMIN_PASS = os.environ.get("ADMIN_PASS", "alina5085")
 
