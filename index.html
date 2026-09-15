@@ -4975,7 +4975,9 @@ createApp({
             if (typeof d.autoConvertAmber === 'boolean') autoConvertAmber.value = d.autoConvertAmber
         }
 
-        const isStaticHost = window.location.hostname.includes('github.io') || window.location.protocol === 'file:'
+        const API_BASE = (window.location.hostname.includes('onrender.com') || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+            ? ''
+            : 'https://wos-calc.onrender.com'
 
         // 快速查詢白名單中管理者設定的角色名稱與權限
         const lookupPlayer = async (pid) => {
@@ -4985,21 +4987,8 @@ createApp({
                 isWhitelisted.value = null
                 return null
             }
-            if (isStaticHost) {
-                const localWl = getLocalWhitelist()
-                const found = localWl.find(item => String(item.player_id).trim() === trimmedPid)
-                if (found) {
-                    isWhitelisted.value = true
-                    playerName.value = found.player_name || ''
-                    return found
-                } else {
-                    isWhitelisted.value = false
-                    playerName.value = ''
-                    return null
-                }
-            }
             try {
-                const res = await fetch(`/api/user?player_id=${encodeURIComponent(trimmedPid)}`)
+                const res = await fetch(`${API_BASE}/api/user?player_id=${encodeURIComponent(trimmedPid)}`)
                 if (res.ok) {
                     const data = await res.json()
                     if (data.whitelisted) {
@@ -5013,6 +5002,7 @@ createApp({
                     }
                 }
             } catch(e) {
+                // 雲端連線失敗時由本地降級比對
                 const localWl = getLocalWhitelist()
                 const found = localWl.find(item => String(item.player_id).trim() === trimmedPid)
                 if (found) {
@@ -5046,35 +5036,8 @@ createApp({
             }
             isLoading.value = true
 
-            // 若在 GitHub Pages 或靜態環境，優先由本地資料庫處理
-            if (isStaticHost) {
-                const localWl = getLocalWhitelist()
-                const found = localWl.find(item => String(item.player_id).trim() === pid)
-                if (found) {
-                    isWhitelisted.value = true
-                    playerName.value = found.player_name || pid
-                    const localSaves = getLocalUserSaves()
-                    const saveEntry = localSaves[pid]
-                    if (saveEntry && saveEntry.data) {
-                        applyUserData(saveEntry.data)
-                        lastUpdated.value = saveEntry.updated_at || '已載入'
-                        showNotification(`歡迎回來【${playerName.value}】，已載入存檔！`, 'success')
-                    } else {
-                        showNotification(`ID【${pid}】已授權！角色：【${playerName.value}】，目前尚無存檔，可點擊「儲存進度」。`, 'info')
-                    }
-                    localStorage.setItem('wos_player_id', pid)
-                    if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
-                } else {
-                    isWhitelisted.value = false
-                    playerName.value = ''
-                    if (!silent) showNotification('⚠️ 此遊戲 ID 尚未在管理者白名單中！請先聯絡管理者開通。', 'error')
-                }
-                isLoading.value = false
-                return
-            }
-
             try {
-                const res = await fetch(`/api/user?player_id=${encodeURIComponent(pid)}`)
+                const res = await fetch(`${API_BASE}/api/user?player_id=${encodeURIComponent(pid)}`)
                 if (!res.ok && res.status !== 403) throw new Error('HTTP ' + res.status)
                 const data = await res.json()
                 if (data.whitelisted) {
@@ -5084,7 +5047,7 @@ createApp({
                     
                     if (data.data) {
                         applyUserData(data.data)
-                        showNotification(data.msg || `歡迎回來【${playerName.value}】，已載入存檔！`, 'success')
+                        showNotification(data.msg || `歡迎回來【${playerName.value}】，已載入雲端存檔！`, 'success')
                     } else {
                         showNotification(data.msg || `已通過白名單授權！角色：【${playerName.value}】，可點擊「儲存進度」。`, 'info')
                     }
@@ -5096,6 +5059,7 @@ createApp({
                     showNotification(data.msg || '⚠️ 此遊戲 ID 尚未開通存檔權限，請聯絡管理員', 'error')
                 }
             } catch (err) {
+                // 雲端異常時本地降級處理
                 const localWl = getLocalWhitelist()
                 const found = localWl.find(item => String(item.player_id).trim() === pid)
                 if (found) {
@@ -5106,7 +5070,7 @@ createApp({
                     if (saveEntry && saveEntry.data) {
                         applyUserData(saveEntry.data)
                         lastUpdated.value = saveEntry.updated_at || '本地存檔'
-                        showNotification(`歡迎回來【${playerName.value}】，已載入存檔！`, 'success')
+                        showNotification(`歡迎回來【${playerName.value}】，已載入本地存檔！`, 'success')
                     }
                 } else {
                     isWhitelisted.value = false
@@ -5140,44 +5104,13 @@ createApp({
                 autoConvertAmber: autoConvertAmber.value
             }
 
-            // 若在 GitHub Pages 或靜態環境
-            if (isStaticHost) {
-                const localWl = getLocalWhitelist()
-                const found = localWl.find(item => String(item.player_id).trim() === pid)
-                if (found) {
-                    isWhitelisted.value = true
-                    playerName.value = found.player_name || pid
-                    const nowStr = new Date().toLocaleString()
-                    const localSaves = getLocalUserSaves()
-                    localSaves[pid] = {
-                        player_name: playerName.value,
-                        data: currentData,
-                        updated_at: nowStr
-                    }
-                    saveLocalUserSaves(localSaves)
-                    found.has_save = true
-                    found.updated_at = nowStr
-                    saveLocalWhitelist(localWl)
-                    lastUpdated.value = nowStr
-                    showNotification(`【${playerName.value}】進度已成功儲存！`, 'success')
-                    localStorage.setItem('wos_player_id', pid)
-                    if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
-                } else {
-                    isWhitelisted.value = false
-                    playerName.value = ''
-                    showNotification('儲存失敗：此遊戲 ID 未在管理者白名單內！', 'error')
-                }
-                isSaving.value = false
-                return
-            }
-
             const payload = {
                 player_id: pid,
                 player_name: playerName.value || pid,
                 data: currentData
             }
             try {
-                const res = await fetch('/api/save', {
+                const res = await fetch(`${API_BASE}/api/save`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -5196,6 +5129,7 @@ createApp({
                     showNotification(data.msg || '儲存失敗，未獲白名單授權', 'error')
                 }
             } catch (err) {
+                // 雲端連線失敗時本地降級備份
                 const localWl = getLocalWhitelist()
                 const found = localWl.find(item => String(item.player_id).trim() === pid)
                 if (found) {
@@ -5210,7 +5144,7 @@ createApp({
                     }
                     saveLocalUserSaves(localSaves)
                     lastUpdated.value = nowStr
-                    showNotification(`【${playerName.value}】進度已成功儲存！`, 'success')
+                    showNotification(`【${playerName.value}】進度已暫存於本機！`, 'success')
                 } else {
                     isWhitelisted.value = false
                     showNotification('儲存失敗：此遊戲 ID 未在白名單內！', 'error')
@@ -5244,13 +5178,8 @@ createApp({
                 return
             }
 
-            if (isStaticHost) {
-                adminLoginErr.value = '管理密碼錯誤 (預設密碼為 alina5085)'
-                return
-            }
-
             try {
-                const res = await fetch('/api/admin/login', {
+                const res = await fetch(`${API_BASE}/api/admin/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ password: inputPwd })
@@ -5270,19 +5199,18 @@ createApp({
         }
 
         const fetchWhitelist = async () => {
-            if (!isStaticHost) {
-                try {
-                    const res = await fetch(`/api/admin/whitelist?admin_pass=${encodeURIComponent(adminPassInput.value || 'alina5085')}`)
-                    if (res.ok) {
-                        const data = await res.json()
-                        if (data.success) {
-                            whitelistList.value = data.whitelist || []
-                            return
-                        }
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/whitelist?admin_pass=${encodeURIComponent(adminPassInput.value || 'alina5085')}`)
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.success) {
+                        whitelistList.value = data.whitelist || []
+                        return
                     }
-                } catch (err) {}
-            }
-            // 本地 / 靜態模式
+                }
+            } catch (err) {}
+
+            // 本地降級模式
             const localWl = getLocalWhitelist()
             const localSaves = getLocalUserSaves()
             localWl.forEach(item => {
@@ -5298,32 +5226,31 @@ createApp({
             const pid = (newWlId.value || '').trim()
             if (!pid) return alert('請輸入遊戲 ID')
 
-            if (!isStaticHost) {
-                try {
-                    const res = await fetch('/api/admin/whitelist/add', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            admin_pass: adminPassInput.value || 'alina5085',
-                            player_id: pid,
-                            player_name: newWlName.value.trim(),
-                            note: newWlNote.value.trim()
-                        })
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/whitelist/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_pass: adminPassInput.value || 'alina5085',
+                        player_id: pid,
+                        player_name: newWlName.value.trim(),
+                        note: newWlNote.value.trim()
                     })
-                    if (res.ok) {
-                        const data = await res.json()
-                        if (data.success) {
-                            newWlId.value = ''
-                            newWlName.value = ''
-                            newWlNote.value = ''
-                            fetchWhitelist()
-                            return
-                        }
+                })
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.success) {
+                        newWlId.value = ''
+                        newWlName.value = ''
+                        newWlNote.value = ''
+                        fetchWhitelist()
+                        alert(`已將遊戲 ID: ${pid} 成功加入雲端白名單！`)
+                        return
                     }
-                } catch (err) {}
-            }
+                }
+            } catch (err) {}
 
-            // 靜態 / 降級新增
+            // 本地降級新增
             const localWl = getLocalWhitelist()
             const idx = localWl.findIndex(item => String(item.player_id).trim() === pid)
             const itemObj = {
@@ -5345,26 +5272,25 @@ createApp({
 
         const deleteWhitelistItem = async (pid) => {
             if (!confirm(`確定要從白名單移除遊戲 ID: ${pid} 嗎？`)) return
-            if (!isStaticHost) {
-                try {
-                    const res = await fetch('/api/admin/whitelist/delete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            admin_pass: adminPassInput.value || 'alina5085',
-                            player_id: pid
-                        })
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/whitelist/delete`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_pass: adminPassInput.value || 'alina5085',
+                        player_id: pid
                     })
-                    if (res.ok) {
-                        const data = await res.json()
-                        if (data.success) {
-                            fetchWhitelist()
-                            return
-                        }
+                })
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.success) {
+                        fetchWhitelist()
+                        return
                     }
-                } catch (err) {}
-            }
-            // 靜態刪除
+                }
+            } catch (err) {}
+
+            // 本地降級刪除
             let localWl = getLocalWhitelist()
             localWl = localWl.filter(item => String(item.player_id).trim() !== String(pid).trim())
             saveLocalWhitelist(localWl)
