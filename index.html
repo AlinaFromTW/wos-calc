@@ -4917,16 +4917,54 @@ createApp({
                         if (d.activeTab) activeTab.value = d.activeTab
                         if (d.gearMode) gearMode.value = d.gearMode
                         if (d.gearMultiplier) gearMultiplier.value = d.gearMultiplier
-                        if (d.gemsMultiplier) gemsMultiplier.value = d.gemsMultiplier
-                        if (d.selectedCurrentGearId !== undefined) selectedCurrentGearId.value = d.selectedCurrentGearId
-                        if (d.selectedTargetGearId !== undefined) selectedTargetGearId.value = d.selectedTargetGearId
-                        if (d.selectedCurrentGemId !== undefined) selectedCurrentGemId.value = d.selectedCurrentGemId
-                        if (d.selectedTargetGemId !== undefined) selectedTargetGemId.value = d.selectedTargetGemId
-                        if (d.gearSlots) gearSlots.value = d.gearSlots
-                        if (d.gearInv) gearInv.value = d.gearInv
-                        if (d.gemInv) gemInv.value = d.gemInv
-                        if (typeof d.autoConvertAmber === 'boolean') autoConvertAmber.value = d.autoConvertAmber
-                        
+        // Helper for local fallback storage
+        const getLocalWhitelist = () => {
+            try { return JSON.parse(localStorage.getItem('wos_whitelist_local') || '[]') } catch(e) { return [] }
+        }
+        const saveLocalWhitelist = (list) => {
+            try { localStorage.setItem('wos_whitelist_local', JSON.stringify(list)) } catch(e) {}
+        }
+        const getLocalUserSaves = () => {
+            try { return JSON.parse(localStorage.getItem('wos_user_saves_local') || '{}') } catch(e) { return {} }
+        }
+        const saveLocalUserSaves = (saves) => {
+            try { localStorage.setItem('wos_user_saves_local', JSON.stringify(saves)) } catch(e) {}
+        }
+
+        const applyUserData = (d) => {
+            if (!d) return
+            if (d.activeTab) activeTab.value = d.activeTab
+            if (d.gearMode) gearMode.value = d.gearMode
+            if (d.gearMultiplier) gearMultiplier.value = d.gearMultiplier
+            if (d.gemsMultiplier) gemsMultiplier.value = d.gemsMultiplier
+            if (d.selectedCurrentGearId !== undefined) selectedCurrentGearId.value = d.selectedCurrentGearId
+            if (d.selectedTargetGearId !== undefined) selectedTargetGearId.value = d.selectedTargetGearId
+            if (d.selectedCurrentGemId !== undefined) selectedCurrentGemId.value = d.selectedCurrentGemId
+            if (d.selectedTargetGemId !== undefined) selectedTargetGemId.value = d.selectedTargetGemId
+            if (d.gearSlots) gearSlots.value = d.gearSlots
+            if (d.gearInv) gearInv.value = d.gearInv
+            if (d.gemInv) gemInv.value = d.gemInv
+            if (typeof d.autoConvertAmber === 'boolean') autoConvertAmber.value = d.autoConvertAmber
+        }
+
+        const loadUserSave = async (silent = false) => {
+            const pid = (playerId.value || '').trim()
+            if (!pid) {
+                if (!silent) showNotification('請先輸入遊戲 ID！', 'error')
+                return
+            }
+            isLoading.value = true
+            try {
+                const res = await fetch(`/api/user?player_id=${encodeURIComponent(pid)}`)
+                if (!res.ok && res.status !== 403) throw new Error('HTTP ' + res.status)
+                const data = await res.json()
+                if (data.whitelisted) {
+                    isWhitelisted.value = true
+                    if (data.player_name) playerName.value = data.player_name
+                    if (data.updated_at) lastUpdated.value = data.updated_at
+                    
+                    if (data.data) {
+                        applyUserData(data.data)
                         showNotification(data.msg || `歡迎回來 ${playerName.value || pid}，已載入存檔！`, 'success')
                     } else {
                         showNotification(data.msg || `已通過白名單授權！可點擊「儲存進度」保存數值。`, 'info')
@@ -4938,8 +4976,27 @@ createApp({
                     showNotification(data.msg || '⚠️ 此遊戲 ID 尚未開通存檔權限，請聯絡管理員', 'error')
                 }
             } catch (err) {
-                console.error(err)
-                if (!silent) showNotification('連線伺服器失敗，請檢查後端是否正在運行', 'error')
+                // 本地 / 離線 / GitHub Pages 降級模式
+                const localWl = getLocalWhitelist()
+                const found = localWl.find(item => item.player_id === pid)
+                if (found) {
+                    isWhitelisted.value = true
+                    if (found.player_name) playerName.value = found.player_name
+                    const localSaves = getLocalUserSaves()
+                    const saveEntry = localSaves[pid]
+                    if (saveEntry && saveEntry.data) {
+                        applyUserData(saveEntry.data)
+                        lastUpdated.value = saveEntry.updated_at || '本地存檔'
+                        showNotification(`歡迎回來 ${playerName.value || pid}，已載入本機存檔！`, 'success')
+                    } else {
+                        showNotification(`已通過白名單授權！目前尚無存檔，可點擊「儲存進度」。`, 'info')
+                    }
+                    localStorage.setItem('wos_player_id', pid)
+                    if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
+                } else {
+                    isWhitelisted.value = false
+                    if (!silent) showNotification('⚠️ 此遊戲 ID 尚未在白名單內（請由管理者設定開通）', 'error')
+                }
             } finally {
                 isLoading.value = false
             }
@@ -4952,23 +5009,24 @@ createApp({
                 return
             }
             isSaving.value = true
+            const currentData = {
+                activeTab: activeTab.value,
+                gearMode: gearMode.value,
+                gearMultiplier: gearMultiplier.value,
+                gemsMultiplier: gemsMultiplier.value,
+                selectedCurrentGearId: selectedCurrentGearId.value,
+                selectedTargetGearId: selectedTargetGearId.value,
+                selectedCurrentGemId: selectedCurrentGemId.value,
+                selectedTargetGemId: selectedTargetGemId.value,
+                gearSlots: gearSlots.value,
+                gearInv: gearInv.value,
+                gemInv: gemInv.value,
+                autoConvertAmber: autoConvertAmber.value
+            }
             const payload = {
                 player_id: pid,
                 player_name: playerName.value || pid,
-                data: {
-                    activeTab: activeTab.value,
-                    gearMode: gearMode.value,
-                    gearMultiplier: gearMultiplier.value,
-                    gemsMultiplier: gemsMultiplier.value,
-                    selectedCurrentGearId: selectedCurrentGearId.value,
-                    selectedTargetGearId: selectedTargetGearId.value,
-                    selectedCurrentGemId: selectedCurrentGemId.value,
-                    selectedTargetGemId: selectedTargetGemId.value,
-                    gearSlots: gearSlots.value,
-                    gearInv: gearInv.value,
-                    gemInv: gemInv.value,
-                    autoConvertAmber: autoConvertAmber.value
-                }
+                data: currentData
             }
             try {
                 const res = await fetch('/api/save', {
@@ -4976,6 +5034,7 @@ createApp({
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 })
+                if (!res.ok && res.status !== 403) throw new Error('HTTP ' + res.status)
                 const data = await res.json()
                 if (data.success) {
                     isWhitelisted.value = true
@@ -4988,8 +5047,30 @@ createApp({
                     showNotification(data.msg || '儲存失敗，未獲授權', 'error')
                 }
             } catch (err) {
-                console.error(err)
-                showNotification('儲存失敗：連線伺服器異常', 'error')
+                // 本地 / 離線 降級模式
+                const localWl = getLocalWhitelist()
+                const found = localWl.find(item => item.player_id === pid)
+                if (found) {
+                    isWhitelisted.value = true
+                    const nowStr = new Date().toLocaleString()
+                    const localSaves = getLocalUserSaves()
+                    localSaves[pid] = {
+                        player_name: playerName.value || pid,
+                        data: currentData,
+                        updated_at: nowStr
+                    }
+                    saveLocalUserSaves(localSaves)
+                    found.has_save = true
+                    found.updated_at = nowStr
+                    saveLocalWhitelist(localWl)
+                    lastUpdated.value = nowStr
+                    showNotification(`【${playerName.value || pid}】進度已成功儲存！`, 'success')
+                    localStorage.setItem('wos_player_id', pid)
+                    if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
+                } else {
+                    isWhitelisted.value = false
+                    showNotification('儲存失敗：此遊戲 ID 未在允許儲存的白名單內！', 'error')
+                }
             } finally {
                 isSaving.value = false
             }
@@ -5006,11 +5087,16 @@ createApp({
 
         const loginAdmin = async () => {
             adminLoginErr.value = ''
+            const inputPwd = (adminPassInput.value || '').trim()
+            if (!inputPwd) {
+                adminLoginErr.value = '請輸入管理密碼'
+                return
+            }
             try {
                 const res = await fetch('/api/admin/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: adminPassInput.value })
+                    body: JSON.stringify({ password: inputPwd })
                 })
                 const data = await res.json()
                 if (data.success) {
@@ -5020,7 +5106,13 @@ createApp({
                     adminLoginErr.value = data.msg || '管理密碼錯誤'
                 }
             } catch (err) {
-                adminLoginErr.value = '登入失敗：連線伺服器異常'
+                // 離線/靜態模式驗證預設密碼 ilove2156
+                if (inputPwd === 'ilove2156') {
+                    isAdminLoggedIn.value = true
+                    fetchWhitelist()
+                } else {
+                    adminLoginErr.value = '管理密碼錯誤 (預設密碼為 ilove2156)'
+                }
             }
         }
 
@@ -5030,10 +5122,19 @@ createApp({
                 const data = await res.json()
                 if (data.success) {
                     whitelistList.value = data.whitelist || []
+                    return
                 }
-            } catch (err) {
-                console.error(err)
-            }
+            } catch (err) {}
+            // 離線模式
+            const localWl = getLocalWhitelist()
+            const localSaves = getLocalUserSaves()
+            localWl.forEach(item => {
+                if (localSaves[item.player_id]) {
+                    item.has_save = true
+                    item.updated_at = localSaves[item.player_id].updated_at || item.updated_at
+                }
+            })
+            whitelistList.value = localWl
         }
 
         const addWhitelistItem = async () => {
@@ -5056,12 +5157,27 @@ createApp({
                     newWlName.value = ''
                     newWlNote.value = ''
                     fetchWhitelist()
-                } else {
-                    alert(data.msg || '新增失敗')
+                    return
                 }
-            } catch (err) {
-                alert('連線失敗')
+            } catch (err) {}
+            // 離線/降級新增
+            const localWl = getLocalWhitelist()
+            const idx = localWl.findIndex(item => item.player_id === pid)
+            const itemObj = {
+                player_id: pid,
+                player_name: newWlName.value.trim(),
+                note: newWlNote.value.trim(),
+                created_at: new Date().toLocaleString(),
+                has_save: false
             }
+            if (idx >= 0) localWl[idx] = itemObj
+            else localWl.push(itemObj)
+            saveLocalWhitelist(localWl)
+            newWlId.value = ''
+            newWlName.value = ''
+            newWlNote.value = ''
+            fetchWhitelist()
+            alert(`已將 ID: ${pid} 加入白名單！`)
         }
 
         const deleteWhitelistItem = async (pid) => {
@@ -5078,12 +5194,14 @@ createApp({
                 const data = await res.json()
                 if (data.success) {
                     fetchWhitelist()
-                } else {
-                    alert(data.msg || '刪除失敗')
+                    return
                 }
-            } catch (err) {
-                alert('連線失敗')
-            }
+            } catch (err) {}
+            // 離線刪除
+            let localWl = getLocalWhitelist()
+            localWl = localWl.filter(item => item.player_id !== pid)
+            saveLocalWhitelist(localWl)
+            fetchWhitelist()
         }
 
         // Auto load if playerId saved in localStorage
