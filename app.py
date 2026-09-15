@@ -416,6 +416,52 @@ def admin_add_whitelist():
         cursor.close()
         conn.close()
 
+@app.route('/api/admin/whitelist/update', methods=['POST'])
+def admin_update_whitelist():
+    req = request.get_json() or {}
+    if not verify_admin(req):
+        return jsonify({"success": False, "msg": "無管理員權限"}), 401
+
+    player_id = str(req.get('player_id', '')).strip()
+    player_name = str(req.get('player_name', '')).strip()
+    note = str(req.get('note', '')).strip()
+
+    if not player_id:
+        return jsonify({"success": False, "msg": "遊戲 ID 不得為空"}), 400
+
+    conn, is_pg = get_db()
+    cursor = conn.cursor()
+    try:
+        if is_pg:
+            cursor.execute('''
+                UPDATE whitelist
+                SET player_name = %s, note = %s
+                WHERE player_id = %s
+            ''', (player_name, note, player_id))
+            cursor.execute('''
+                UPDATE user_saves
+                SET player_name = %s
+                WHERE player_id = %s
+            ''', (player_name, player_id))
+        else:
+            cursor.execute('''
+                UPDATE whitelist
+                SET player_name = ?, note = ?
+                WHERE player_id = ?
+            ''', (player_name, note, player_id))
+            cursor.execute('''
+                UPDATE user_saves
+                SET player_name = ?
+                WHERE player_id = ?
+            ''', (player_name, player_id))
+        conn.commit()
+        return jsonify({"success": True, "msg": f"已成功更新 ID: {player_id} 的盟友資料！"})
+    except Exception as e:
+        return jsonify({"success": False, "msg": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 @app.route('/api/admin/whitelist/delete', methods=['POST'])
 def admin_del_whitelist():
     req = request.get_json() or {}

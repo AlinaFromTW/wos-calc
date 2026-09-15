@@ -193,6 +193,26 @@
             grid-template-columns: 1fr 1fr;
             gap: 16px;
         }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-card {
+            background: #111827;
+            border: 1px solid #334155;
+            border-radius: 18px;
+            width: 100%;
+            max-width: 480px;
+            padding: 24px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.6);
+        }
         @media (max-width: 768px) {
             .backup-grid { grid-template-columns: 1fr; }
             .header { flex-direction: column; align-items: flex-start; }
@@ -308,9 +328,12 @@
                                 <span v-else class="badge badge-gray">⏳ 尚無存檔</span>
                             </td>
                             <td style="font-size: 13px; color: #94a3b8;">{{ item.updated_at || item.created_at || '—' }}</td>
-                            <td>
-                                <button type="button" @click="deletePlayer(item.player_id)" class="btn-danger" style="padding: 4px 10px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer; color: white; font-weight: 700;">
-                                    刪除
+                            <td style="white-space: nowrap;">
+                                <button type="button" @click="openEditModal(item)" class="btn-primary" style="padding: 5px 10px; font-size: 12.5px; border-radius: 6px; border: none; cursor: pointer; color: white; font-weight: 700; margin-right: 6px;">
+                                    ✏️ 編輯
+                                </button>
+                                <button type="button" @click="deletePlayer(item.player_id)" class="btn-danger" style="padding: 5px 10px; font-size: 12.5px; border-radius: 6px; border: none; cursor: pointer; color: white; font-weight: 700;">
+                                    🗑️ 刪除
                                 </button>
                             </td>
                         </tr>
@@ -321,6 +344,39 @@
                         </tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Edit Player Modal -->
+            <div class="modal-overlay" v-if="showEditModal" @click.self="showEditModal = false">
+                <div class="modal-card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #1f2937;">
+                        <h3 style="font-size: 18px; font-weight: 800; color: #38bdf8;">✏️ 編輯盟友資料</h3>
+                        <button type="button" @click="showEditModal = false" style="background: none; border: none; font-size: 20px; color: #94a3b8; cursor: pointer;">✕</button>
+                    </div>
+                    <form @submit.prevent="saveEditPlayer">
+                        <div class="form-group">
+                            <label class="form-label">遊戲 ID (不可修改)：</label>
+                            <input type="text" :value="editPlayerId" class="form-input" disabled style="opacity: 0.7; cursor: not-allowed; background: #0f172a;">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">角色名稱 (由管理員設定)：</label>
+                            <input type="text" v-model.trim="editPlayerName" class="form-input" placeholder="例: 刺客幫-小明" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">備註 (選填)：</label>
+                            <input type="text" v-model.trim="editPlayerNote" class="form-input" placeholder="例: 1 隊主力">
+                        </div>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button type="button" @click="showEditModal = false" class="btn-secondary" style="flex: 1; padding: 10px; border-radius: 10px; border: none; font-weight: 700; cursor: pointer;">
+                                取消
+                            </button>
+                            <button type="submit" class="btn-primary" style="flex: 1;" :disabled="isSubmitting">
+                                <span v-if="isSubmitting">⏳ 儲存中...</span>
+                                <span v-else>💾 儲存修改</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 
@@ -419,6 +475,12 @@ createApp({
         const newPlayerId = ref('')
         const newPlayerName = ref('')
         const newPlayerNote = ref('')
+
+        // Edit Player Form & Modal State
+        const showEditModal = ref(false)
+        const editPlayerId = ref('')
+        const editPlayerName = ref('')
+        const editPlayerNote = ref('')
 
         // Change Password Form
         const oldPass = ref('')
@@ -529,6 +591,56 @@ createApp({
                 }
             } catch (err) {
                 showMsg(`已加入本地白名單！`, 'info')
+            } finally {
+                isSubmitting.value = false
+            }
+        }
+
+        const openEditModal = (item) => {
+            editPlayerId.value = item.player_id
+            editPlayerName.value = item.player_name || ''
+            editPlayerNote.value = item.note || ''
+            showEditModal.value = true
+        }
+
+        const saveEditPlayer = async () => {
+            const pid = editPlayerId.value.trim()
+            if (!pid) return
+            isSubmitting.value = true
+            try {
+                const res = await fetch(`${API_BASE}/api/admin/whitelist/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        admin_pass: savedPass.value || 'alina5085',
+                        player_id: pid,
+                        player_name: editPlayerName.value.trim(),
+                        note: editPlayerNote.value.trim()
+                    })
+                })
+                const data = await res.json()
+                if (res.ok && data.success) {
+                    showMsg(data.msg || `已成功更新盟友【${pid}】資料！`, 'success')
+                    showEditModal.value = false
+                    fetchWhitelist()
+                    return
+                } else {
+                    showMsg(data.msg || '更新失敗', 'error')
+                }
+            } catch (err) {
+                // 本地降級更新
+                try {
+                    const localWl = JSON.parse(localStorage.getItem('wos_whitelist_local') || '[]')
+                    const found = localWl.find(item => String(item.player_id).trim() === pid)
+                    if (found) {
+                        found.player_name = editPlayerName.value.trim()
+                        found.note = editPlayerNote.value.trim()
+                        localStorage.setItem('wos_whitelist_local', JSON.stringify(localWl))
+                    }
+                } catch(e){}
+                showMsg('已更新本地白名單資料！', 'info')
+                showEditModal.value = false
+                fetchWhitelist()
             } finally {
                 isSubmitting.value = false
             }
@@ -650,8 +762,9 @@ createApp({
             isLoggedIn, passwordInput, loginError, isSubmitting, activeTab,
             whitelist, searchQuery, filteredWhitelist, message, messageType,
             newPlayerId, newPlayerName, newPlayerNote,
+            showEditModal, editPlayerId, editPlayerName, editPlayerNote,
             oldPass, newPass, confirmPass,
-            login, logout, addPlayer, deletePlayer, downloadBackup, handleFileUpload, changePassword
+            login, logout, addPlayer, openEditModal, saveEditPlayer, deletePlayer, downloadBackup, handleFileUpload, changePassword
         }
     }
 }).mount('#app')
