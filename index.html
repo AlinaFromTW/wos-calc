@@ -848,9 +848,9 @@
             <div style="display: flex; gap: 8px; align-items: center;">
                 <span v-if="isWhitelisted === true" class="acc-status-badge acc-badge-ok">✅ 已開通存檔權限</span>
                 <span v-else-if="isWhitelisted === false" class="acc-status-badge acc-badge-warn">⚠️ 未開通存檔權限</span>
-                <button type="button" class="acc-btn acc-btn-admin" @click="openAdminModal">
-                    ⚙️ 管理者設定
-                </button>
+                <a href="./admin.html" class="acc-btn acc-btn-admin" style="text-decoration: none;">
+                    ⚙️ 管理者後台
+                </a>
             </div>
         </div>
         <div class="account-inputs-grid">
@@ -5120,7 +5120,7 @@ createApp({
                 if (data.success) {
                     isWhitelisted.value = true
                     if (data.player_name) playerName.value = data.player_name
-                    lastUpdated.value = data.updated_at || new Date().toLocaleString()
+                    lastUpdated.value = data.updated_at || new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false })
                     showNotification(data.msg || `【${playerName.value}】進度已成功儲存至雲端！`, 'success')
                     localStorage.setItem('wos_player_id', pid)
                     if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
@@ -5135,7 +5135,7 @@ createApp({
                 if (found) {
                     isWhitelisted.value = true
                     playerName.value = found.player_name || pid
-                    const nowStr = new Date().toLocaleString()
+                    const nowStr = new Date().toLocaleString('zh-TW', { timeZone: 'Asia/Taipei', hour12: false })
                     const localSaves = getLocalUserSaves()
                     localSaves[pid] = {
                         player_name: playerName.value,
@@ -5147,6 +5147,7 @@ createApp({
                     showNotification(`【${playerName.value}】進度已暫存於本機！`, 'success')
                 } else {
                     isWhitelisted.value = false
+                    playerName.value = ''
                     showNotification('儲存失敗：此遊戲 ID 未在白名單內！', 'error')
                 }
             } finally {
