@@ -213,8 +213,93 @@
             padding: 24px;
             box-shadow: 0 20px 30px rgba(0,0,0,0.6);
         }
+
+        /* Hero Gear UI */
+        .hero-type-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .hero-type-btn {
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 12px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #cbd5e1;
+        }
+        .hero-type-btn.active {
+            background: #0369a1;
+            border-color: #38bdf8;
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(56,189,248,0.3);
+        }
+        .hero-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .hero-slot-card {
+            background: #1e293b;
+            border: 2px solid #334155;
+            border-radius: 14px;
+            padding: 18px;
+            transition: all 0.2s;
+            position: relative;
+        }
+        .hero-slot-card.priority-1 {
+            border-color: #f59e0b;
+            background: linear-gradient(145deg, #1e293b 0%, rgba(245,158,11,0.08) 100%);
+        }
+        .hero-slot-card.priority-2 {
+            border-color: #38bdf8;
+        }
+        .priority-tag-gold {
+            background: rgba(245,158,11,0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245,158,11,0.4);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 800;
+        }
+        .priority-tag-blue {
+            background: rgba(56,189,248,0.2);
+            color: #38bdf8;
+            border: 1px solid rgba(56,189,248,0.4);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 800;
+        }
+        .priority-tag-gray {
+            background: rgba(100,116,139,0.2);
+            color: #94a3b8;
+            border: 1px solid rgba(100,116,139,0.4);
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 800;
+        }
+        .mat-diff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+        }
+        .mat-diff-card {
+            background: #0f172a;
+            border: 1.5px solid #334155;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
         @media (max-width: 768px) {
             .backup-grid { grid-template-columns: 1fr; }
+            .hero-type-grid { grid-template-columns: 1fr; }
             .header { flex-direction: column; align-items: flex-start; }
         }
     </style>
@@ -273,6 +358,9 @@
             </button>
             <button type="button" class="tab-btn" :class="{active: activeTab === 'password'}" @click="activeTab = 'password'">
                 🔑 變更管理密碼
+            </button>
+            <button type="button" class="tab-btn" :class="{active: activeTab === 'herogear'}" @click="activeTab = 'herogear'" style="border-color: #38bdf8;">
+                👑 英雄裝備試算 (管理者限定)
             </button>
         </div>
 
@@ -447,6 +535,186 @@
                 </button>
             </form>
         </div>
+
+        <!-- Tab 4: Hero Gear Calculator (Admin Preview) -->
+        <div class="card" v-show="activeTab === 'herogear'">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 16px;">
+                <div>
+                    <h2 style="font-size: 19px; font-weight: 900; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+                        <span>👑</span>
+                        <span>英雄裝備強化、升星與專屬秘銀計算機</span>
+                        <span style="background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); font-size: 11px; padding: 2px 8px; border-radius: 6px;">管理者限定預覽</span>
+                    </h2>
+                    <p style="color: #94a3b8; font-size: 13.5px; margin-top: 4px;">
+                        智能計算各兵種英雄裝備升級所需之 <b>秘銀</b>、<b>打熊石頭（專屬零件）</b> 與 <b>螺絲經驗</b>，並提供最高性價比之優先升級指引。
+                    </p>
+                </div>
+            </div>
+
+            <!-- Strategy Guide Banner -->
+            <div style="background: linear-gradient(135deg, rgba(2,132,199,0.15) 0%, rgba(15,23,42,0.6) 100%); border: 1.5px solid rgba(56,189,248,0.4); border-radius: 14px; padding: 16px 20px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                    <span style="font-size: 20px;">💡</span>
+                    <h3 style="font-size: 15px; font-weight: 800; color: #38bdf8;">
+                        {{ heroType === 'infantry' ? '🛡️ 盾兵英雄 (步兵) - 黃金升級法則' : (heroType === 'marksman' ? '🏹 弓兵英雄 (射手) - 極致輸出法則' : '🔱 矛兵英雄 (槍兵) - 致命秒殺法則') }}
+                    </h3>
+                </div>
+                <div v-if="heroType === 'infantry'" style="font-size: 13.5px; color: #cbd5e1; line-height: 1.6;">
+                    • <b>優先升級順序</b>：<span style="color: #fbbf24; font-weight: 800;">🪖 頭盔 (加生命 HP) ➡️ 🎽 胸甲 (加防禦 DEF)</span>。<br>
+                    • <b>秘銀分配策略</b>：盾兵承擔前排 70%~80% 傷害，前排站得住全軍才有輸出。所有 <b>秘銀</b> 100% 優先砸滿頭盔與胸甲，手套與靴子保留在基礎紅裝即可！
+                </div>
+                <div v-else style="font-size: 13.5px; color: #cbd5e1; line-height: 1.6;">
+                    • <b>優先升級順序</b>：<span style="color: #fbbf24; font-weight: 800;">🧤 手套 (加攻擊 ATK) ➡️ 🥾 靴子 (加致命/攻擊)</span>。<br>
+                    • <b>秘銀分配策略</b>：弓兵與矛兵為主力輸出，所有 <b>秘銀</b> 100% 優先灌在手套與靴子拉滿攻擊%與致命暴擊，讓獵熊與集結傷害翻倍！頭甲保持基礎即可。
+                </div>
+            </div>
+
+            <!-- Hero Type Selector -->
+            <div class="hero-type-grid">
+                <div class="hero-type-btn" :class="{active: heroType === 'infantry'}" @click="heroType = 'infantry'">
+                    <div style="font-size: 24px; margin-bottom: 4px;">🛡️</div>
+                    <div style="font-weight: 900; font-size: 15.5px;">盾兵英雄 (步兵)</div>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">重防禦與生命 (首升頭甲)</div>
+                </div>
+                <div class="hero-type-btn" :class="{active: heroType === 'marksman'}" @click="heroType = 'marksman'">
+                    <div style="font-size: 24px; margin-bottom: 4px;">🏹</div>
+                    <div style="font-weight: 900; font-size: 15.5px;">弓兵英雄 (射手)</div>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">重攻擊與致命 (首升手靴)</div>
+                </div>
+                <div class="hero-type-btn" :class="{active: heroType === 'lancer'}" @click="heroType = 'lancer'">
+                    <div style="font-size: 24px; margin-bottom: 4px;">🔱</div>
+                    <div style="font-weight: 900; font-size: 15.5px;">矛兵英雄 (槍兵)</div>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">重攻擊與穿透 (首升手靴)</div>
+                </div>
+            </div>
+
+            <!-- Quick Action Preset Buttons -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
+                <button type="button" @click="applyHeroPreset('golden')" class="btn-primary" style="padding: 8px 14px; font-size: 13px; background: #0284c7;">
+                    ⭐ 一鍵套用{{ heroType === 'infantry' ? '盾兵最省秘銀配置 (頭甲T2/手靴紅裝)' : '弓矛極致輸出配置 (手靴T2/頭甲紅裝)' }}
+                </button>
+                <button type="button" @click="syncAllHeroSlots('t1')" class="btn-secondary" style="padding: 8px 14px; font-size: 13px;">
+                    🎯 全部位設為專屬 T1 (5星)
+                </button>
+                <button type="button" @click="syncAllHeroSlots('t2')" class="btn-secondary" style="padding: 8px 14px; font-size: 13px;">
+                    💎 全部位設為專屬 T2 (5星)
+                </button>
+            </div>
+
+            <!-- 4 Slots Configuration Grid -->
+            <div class="hero-slots-grid">
+                <div v-for="(slot, key) in heroSlots[heroType]" :key="key" class="hero-slot-card" :class="{'priority-1': slot.priority === 1, 'priority-2': slot.priority === 2}">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 24px;">{{ slot.icon }}</span>
+                            <div>
+                                <div style="font-weight: 900; font-size: 16px; color: #ffffff;">{{ slot.name }}</div>
+                                <div style="font-size: 12px; color: #38bdf8;">{{ slot.attrDesc }}</div>
+                            </div>
+                        </div>
+                        <span v-if="slot.priority === 1" class="priority-tag-gold">🌟 第 1 優先 (必升)</span>
+                        <span v-else-if="slot.priority === 2" class="priority-tag-blue">⭐ 第 2 優先</span>
+                        <span v-else class="priority-tag-gray">次要 (先保留)</span>
+                    </div>
+
+                    <div style="margin-bottom: 10px;">
+                        <label class="form-label" style="font-size: 12px;">當前階段：</label>
+                        <select v-model.number="slot.currentId" class="form-input" style="padding: 8px 10px; font-size: 13.5px; background: #0f172a;">
+                            <option v-for="st in HERO_GEAR_STAGES" :key="st.id" :value="st.id">
+                                {{ st.label }} (主加成 {{ st.mainAttr }})
+                            </option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="form-label" style="font-size: 12px;">目標階段：</label>
+                        <select v-model.number="slot.targetId" class="form-input" style="padding: 8px 10px; font-size: 13.5px; background: #0f172a; border-color: #0284c7;">
+                            <option v-for="st in HERO_GEAR_STAGES" :key="st.id" :value="st.id">
+                                {{ st.label }} (主加成 {{ st.mainAttr }})
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Single Slot Material Needs Preview -->
+                    <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: #94a3b8; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px;">
+                        <span>需秘銀: <b style="color: #38bdf8;">{{ formatNum(getSingleSlotCost(slot).mithril) }}</b></span>
+                        <span>需石頭: <b style="color: #fbbf24;">{{ formatNum(getSingleSlotCost(slot).stone) }}</b></span>
+                        <span>需經驗: <b style="color: #cbd5e1;">{{ formatNum(getSingleSlotCost(slot).screw) }}</b></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventory Input & Calculation Summary -->
+            <div style="background: #111827; border: 2px solid #1f2937; border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                    <h3 style="font-size: 16px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 6px;">
+                        <span>🎒</span>
+                        <span>現有背包庫存輸入 (自動扣除計算差額)</span>
+                    </h3>
+                    <button type="button" @click="clearHeroInv" class="btn-secondary" style="padding: 4px 10px; font-size: 12px; border-radius: 6px; border: none; cursor: pointer;">
+                        🧹 清空庫存
+                    </button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                    <div>
+                        <label class="form-label" style="font-size: 13px;">🧪 現有秘銀 (Mithril)：</label>
+                        <input type="number" v-model.number="heroInv.mithril" min="0" placeholder="0" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size: 13px;">🪨 現有打熊石頭 (專屬零件)：</label>
+                        <input type="number" v-model.number="heroInv.stone" min="0" placeholder="0" class="form-input">
+                    </div>
+                    <div>
+                        <label class="form-label" style="font-size: 13px;">🔩 現有螺絲 / 強化經驗：</label>
+                        <input type="number" v-model.number="heroInv.screw" min="0" placeholder="0" class="form-input">
+                    </div>
+                </div>
+
+                <!-- Calculation Results Diff Cards -->
+                <h3 style="font-size: 16px; font-weight: 800; color: #38bdf8; margin-bottom: 12px;">
+                    📊 {{ heroType === 'infantry' ? '🛡️ 盾兵' : (heroType === 'marksman' ? '🏹 弓兵' : '🔱 矛兵') }} 英雄裝備升級總材料差額
+                </h3>
+
+                <div class="mat-diff-grid">
+                    <!-- Mithril -->
+                    <div class="mat-diff-card">
+                        <div style="font-size: 13px; color: #94a3b8; font-weight: 700; margin-bottom: 4px;">🧪 精煉秘銀 (Mithril)</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                            <span>總共需要: <b>{{ formatNum(heroResult.mithril.needed) }}</b></span>
+                            <span>現有: <b>{{ formatNum(heroResult.mithril.have) }}</b></span>
+                        </div>
+                        <div style="font-size: 18px; font-weight: 900;" :style="{color: heroResult.mithril.diff > 0 ? '#ef4444' : '#10b981'}">
+                            {{ heroResult.mithril.diff > 0 ? '❌ 尚缺 ' + formatNum(heroResult.mithril.diff) + ' 秘銀' : '✅ 秘銀足夠 (多 ' + formatNum(-heroResult.mithril.diff) + ')' }}
+                        </div>
+                    </div>
+
+                    <!-- Bear Stone -->
+                    <div class="mat-diff-card">
+                        <div style="font-size: 13px; color: #94a3b8; font-weight: 700; margin-bottom: 4px;">🪨 打熊石頭 (專屬零件)</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                            <span>總共需要: <b>{{ formatNum(heroResult.stone.needed) }}</b></span>
+                            <span>現有: <b>{{ formatNum(heroResult.stone.have) }}</b></span>
+                        </div>
+                        <div style="font-size: 18px; font-weight: 900;" :style="{color: heroResult.stone.diff > 0 ? '#ef4444' : '#10b981'}">
+                            {{ heroResult.stone.diff > 0 ? '❌ 尚缺 ' + formatNum(heroResult.stone.diff) + ' 石頭' : '✅ 石頭足夠 (多 ' + formatNum(-heroResult.stone.diff) + ')' }}
+                        </div>
+                    </div>
+
+                    <!-- Screws / XP -->
+                    <div class="mat-diff-card">
+                        <div style="font-size: 13px; color: #94a3b8; font-weight: 700; margin-bottom: 4px;">🔩 螺絲 / 強化經驗 (XP)</div>
+                        <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px;">
+                            <span>總共需要: <b>{{ formatNum(heroResult.screw.needed) }}</b></span>
+                            <span>現有: <b>{{ formatNum(heroResult.screw.have) }}</b></span>
+                        </div>
+                        <div style="font-size: 18px; font-weight: 900;" :style="{color: heroResult.screw.diff > 0 ? '#ef4444' : '#10b981'}">
+                            {{ heroResult.screw.diff > 0 ? '❌ 尚缺 ' + formatNum(heroResult.screw.diff) + ' 經驗' : '✅ 經驗足夠 (多 ' + formatNum(-heroResult.screw.diff) + ')' }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -486,6 +754,140 @@ createApp({
         const oldPass = ref('')
         const newPass = ref('')
         const confirmPass = ref('')
+
+        // ==========================================
+        // 👑 英雄裝備計算機 (管理者限定) 數據與邏輯
+        // ==========================================
+        const HERO_GEAR_STAGES = [
+            // 神話紅裝 (Mythic Red)
+            { id: 0, label: '神話紅裝 0星', mainAttr: '+10%', cumMithril: 0, cumStone: 0, cumScrew: 0 },
+            { id: 1, label: '神話紅裝 1星', mainAttr: '+18%', cumMithril: 0, cumStone: 20, cumScrew: 1500 },
+            { id: 2, label: '神話紅裝 2星', mainAttr: '+28%', cumMithril: 0, cumStone: 60, cumScrew: 5000 },
+            { id: 3, label: '神話紅裝 3星', mainAttr: '+40%', cumMithril: 0, cumStone: 120, cumScrew: 11000 },
+            { id: 4, label: '神話紅裝 4星', mainAttr: '+54%', cumMithril: 0, cumStone: 200, cumScrew: 21000 },
+            { id: 5, label: '神話紅裝 5星滿', mainAttr: '+70%', cumMithril: 0, cumStone: 300, cumScrew: 36000 },
+
+            // 專屬 T1 (Mastery T1)
+            { id: 6, label: '專屬 T1 - 0星', mainAttr: '+85%', cumMithril: 10, cumStone: 420, cumScrew: 56000 },
+            { id: 7, label: '專屬 T1 - 1星', mainAttr: '+100%', cumMithril: 25, cumStone: 560, cumScrew: 81000 },
+            { id: 8, label: '專屬 T1 - 2星', mainAttr: '+118%', cumMithril: 45, cumStone: 720, cumScrew: 111000 },
+            { id: 9, label: '專屬 T1 - 3星', mainAttr: '+138%', cumMithril: 70, cumStone: 900, cumScrew: 146000 },
+            { id: 10, label: '專屬 T1 - 4星', mainAttr: '+160%', cumMithril: 100, cumStone: 1100, cumScrew: 186000 },
+            { id: 11, label: '專屬 T1 - 5星滿', mainAttr: '+185%', cumMithril: 140, cumStone: 1340, cumScrew: 236000 },
+
+            // 專屬 T2 (Mastery T2)
+            { id: 12, label: '專屬 T2 - 0星', mainAttr: '+215%', cumMithril: 190, cumStone: 1620, cumScrew: 296000 },
+            { id: 13, label: '專屬 T2 - 1星', mainAttr: '+245%', cumMithril: 250, cumStone: 1940, cumScrew: 366000 },
+            { id: 14, label: '專屬 T2 - 2星', mainAttr: '+280%', cumMithril: 320, cumStone: 2300, cumScrew: 446000 },
+            { id: 15, label: '專屬 T2 - 3星', mainAttr: '+320%', cumMithril: 400, cumStone: 2700, cumScrew: 536000 },
+            { id: 16, label: '專屬 T2 - 4星', mainAttr: '+365%', cumMithril: 490, cumStone: 3150, cumScrew: 636000 },
+            { id: 17, label: '專屬 T2 - 5星滿', mainAttr: '+415%', cumMithril: 590, cumStone: 3650, cumScrew: 756000 },
+
+            // 專屬 T3 (Mastery T3)
+            { id: 18, label: '專屬 T3 - 0星', mainAttr: '+470%', cumMithril: 710, cumStone: 4200, cumScrew: 896000 },
+            { id: 19, label: '專屬 T3 - 1星', mainAttr: '+530%', cumMithril: 850, cumStone: 4800, cumScrew: 1056000 },
+            { id: 20, label: '專屬 T3 - 2星', mainAttr: '+600%', cumMithril: 1010, cumStone: 5450, cumScrew: 1236000 },
+            { id: 21, label: '專屬 T3 - 3星', mainAttr: '+675%', cumMithril: 1190, cumStone: 6150, cumScrew: 1436000 },
+            { id: 22, label: '專屬 T3 - 4星', mainAttr: '+760%', cumMithril: 1390, cumStone: 6900, cumScrew: 1656000 },
+            { id: 23, label: '專屬 T3 - 5星滿', mainAttr: '+850%', cumMithril: 1640, cumStone: 7700, cumScrew: 1906000 }
+        ]
+
+        const heroType = ref('infantry')
+        const heroInv = ref({ mithril: 0, stone: 0, screw: 0 })
+
+        const heroSlots = ref({
+            infantry: {
+                helmet: { name: '頭盔 (戰盔)', icon: '🪖', attrDesc: '步兵生命 (前排核心)', priority: 1, currentId: 0, targetId: 11 },
+                chest:  { name: '胸甲 (胸甲)', icon: '🎽', attrDesc: '步兵防禦 (減免承傷)', priority: 1, currentId: 0, targetId: 11 },
+                gloves: { name: '手套 (護手)', icon: '🧤', attrDesc: '步兵攻擊 (次要屬性)', priority: 2, currentId: 0, targetId: 5 },
+                boots:  { name: '靴子 (戰靴)', icon: '🥾', attrDesc: '步兵致命 (次要屬性)', priority: 2, currentId: 0, targetId: 5 }
+            },
+            marksman: {
+                gloves: { name: '手套 (護手)', icon: '🧤', attrDesc: '射手攻擊 (主力輸出)', priority: 1, currentId: 0, targetId: 11 },
+                boots:  { name: '靴子 (戰靴)', icon: '🥾', attrDesc: '射手致命 (極致暴擊)', priority: 1, currentId: 0, targetId: 11 },
+                helmet: { name: '頭盔 (戰盔)', icon: '🪖', attrDesc: '射手生命 (次要屬性)', priority: 2, currentId: 0, targetId: 5 },
+                chest:  { name: '胸甲 (胸甲)', icon: '🎽', attrDesc: '射手防禦 (次要屬性)', priority: 2, currentId: 0, targetId: 5 }
+            },
+            lancer: {
+                gloves: { name: '手套 (護手)', icon: '🧤', attrDesc: '槍兵攻擊 (秒殺破防)', priority: 1, currentId: 0, targetId: 11 },
+                boots:  { name: '靴子 (戰靴)', icon: '🥾', attrDesc: '槍兵致命 (穿透打擊)', priority: 1, currentId: 0, targetId: 11 },
+                helmet: { name: '頭盔 (戰盔)', icon: '🪖', attrDesc: '槍兵生命 (次要屬性)', priority: 2, currentId: 0, targetId: 5 },
+                chest:  { name: '胸甲 (胸甲)', icon: '🎽', attrDesc: '槍兵防禦 (次要屬性)', priority: 2, currentId: 0, targetId: 5 }
+            }
+        })
+
+        const formatNum = (num) => {
+            if (num === undefined || num === null) return '0'
+            return Math.round(num).toLocaleString()
+        }
+
+        const getSingleSlotCost = (slot) => {
+            if (!slot || slot.targetId <= slot.currentId) {
+                return { mithril: 0, stone: 0, screw: 0 }
+            }
+            const cur = HERO_GEAR_STAGES[slot.currentId] || { cumMithril: 0, cumStone: 0, cumScrew: 0 }
+            const tgt = HERO_GEAR_STAGES[slot.targetId] || { cumMithril: 0, cumStone: 0, cumScrew: 0 }
+            return {
+                mithril: Math.max(0, tgt.cumMithril - cur.cumMithril),
+                stone: Math.max(0, tgt.cumStone - cur.cumStone),
+                screw: Math.max(0, tgt.cumScrew - cur.cumScrew)
+            }
+        }
+
+        const heroResult = computed(() => {
+            let neededMithril = 0
+            let neededStone = 0
+            let neededScrew = 0
+            const slots = heroSlots.value[heroType.value] || {}
+            for (const key in slots) {
+                const cost = getSingleSlotCost(slots[key])
+                neededMithril += cost.mithril
+                neededStone += cost.stone
+                neededScrew += cost.screw
+            }
+            const haveMithril = Number(heroInv.value.mithril) || 0
+            const haveStone = Number(heroInv.value.stone) || 0
+            const haveScrew = Number(heroInv.value.screw) || 0
+
+            return {
+                mithril: { needed: neededMithril, have: haveMithril, diff: neededMithril - haveMithril },
+                stone: { needed: neededStone, have: haveStone, diff: neededStone - haveStone },
+                screw: { needed: neededScrew, have: haveScrew, diff: neededScrew - haveScrew }
+            }
+        })
+
+        const applyHeroPreset = (preset) => {
+            const slots = heroSlots.value[heroType.value]
+            if (preset === 'golden') {
+                if (heroType.value === 'infantry') {
+                    slots.helmet.currentId = 0; slots.helmet.targetId = 17; // T2 5星
+                    slots.chest.currentId = 0; slots.chest.targetId = 17;  // T2 5星
+                    slots.gloves.currentId = 0; slots.gloves.targetId = 5;  // 紅裝 5星
+                    slots.boots.currentId = 0; slots.boots.targetId = 5;   // 紅裝 5星
+                } else {
+                    slots.gloves.currentId = 0; slots.gloves.targetId = 17; // T2 5星
+                    slots.boots.currentId = 0; slots.boots.targetId = 17;   // T2 5星
+                    slots.helmet.currentId = 0; slots.helmet.targetId = 5;  // 紅裝 5星
+                    slots.chest.currentId = 0; slots.chest.targetId = 5;   // 紅裝 5星
+                }
+                showMsg('已套用黃金性價比升級配置！', 'success')
+            }
+        }
+
+        const syncAllHeroSlots = (tier) => {
+            const slots = heroSlots.value[heroType.value]
+            const target = tier === 't1' ? 11 : (tier === 't2' ? 17 : 23)
+            for (const k in slots) {
+                slots[k].currentId = 0
+                slots[k].targetId = target
+            }
+            showMsg(`已將全部位目標設為專屬 ${tier.toUpperCase()} (5星)！`, 'info')
+        }
+
+        const clearHeroInv = () => {
+            heroInv.value = { mithril: 0, stone: 0, screw: 0 }
+            showMsg('已清空現有庫存！', 'info')
+        }
 
         const showMsg = (txt, type = 'info') => {
             message.value = txt
@@ -764,6 +1166,7 @@ createApp({
             newPlayerId, newPlayerName, newPlayerNote,
             showEditModal, editPlayerId, editPlayerName, editPlayerNote,
             oldPass, newPass, confirmPass,
+            HERO_GEAR_STAGES, heroType, heroInv, heroSlots, formatNum, getSingleSlotCost, heroResult, applyHeroPreset, syncAllHeroSlots, clearHeroInv,
             login, logout, addPlayer, openEditModal, saveEditPlayer, deletePlayer, downloadBackup, handleFileUpload, changePassword
         }
     }
