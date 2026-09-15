@@ -627,7 +627,7 @@
         }
         .account-inputs-grid {
             display: grid;
-            grid-template-columns: 1.2fr 1.2fr auto auto auto;
+            grid-template-columns: 1.2fr 1.2fr auto auto;
             gap: 10px;
             align-items: center;
         }
@@ -645,6 +645,27 @@
         .acc-input:focus {
             border-color: #38bdf8;
             box-shadow: 0 0 0 3px rgba(56,189,248,0.25);
+        }
+        .acc-name-display {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1.5px solid #334155;
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 14.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-height: 42px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .acc-name-display.has-name {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.08);
+            color: #38bdf8;
         }
         .acc-btn {
             padding: 10px 16px;
@@ -837,7 +858,12 @@
                 <input type="text" v-model.trim="playerId" placeholder="請輸入遊戲 ID (例: 12345678)" class="acc-input" @keyup.enter="loadUserSave(false)">
             </div>
             <div>
-                <input type="text" v-model.trim="playerName" placeholder="角色名稱 / 暱稱 (選填)" class="acc-input" @keyup.enter="saveUserSave">
+                <div class="acc-name-display" :class="{'has-name': playerName, 'no-name': !playerName}">
+                    <span style="opacity: 0.7; font-size: 13px;">角色：</span>
+                    <b v-if="playerName" style="color: #38bdf8; font-size: 15px;">{{ playerName }}</b>
+                    <span v-else-if="playerId && isWhitelisted === false" style="color: #f87171; font-size: 13px; font-weight: 700;">（未在白名單內）</span>
+                    <span v-else style="color: #94a3b8; font-size: 13px; font-weight: 600;">（輸入 ID 自動顯示）</span>
+                </div>
             </div>
             <div>
                 <button type="button" class="acc-btn acc-btn-load" :disabled="isLoading" @click="loadUserSave(false)">
@@ -1117,17 +1143,22 @@
                 <div class="amber-convert-box" style="grid-column: 1 / -1;">
                     <label class="amber-convert-label">
                         <input type="checkbox" v-model="autoConvertAmber" class="amber-convert-input">
-                        <span>🔄 啟用琥珀自動折算為設計圖紙（1 個琥珀 = 10 張設計圖紙）</span>
+                        <span>🔄 啟用琥珀缺額自動折算設計圖紙（1 個琥珀 = 10 張設計圖紙）</span>
                     </label>
                     <div style="font-size: 13.5px; color: #92400e; font-weight: 800;">
-                        <template v-if="autoConvertAmber && gearResult.rawAmberNeeded > 0">
-                            ✨ 已自動將 {{ gearResult.rawAmberNeeded }} 琥珀折算為 +{{ formatNumber(gearResult.rawAmberNeeded * 10) }} 張設計圖紙！
-                        </template>
-                        <template v-else-if="autoConvertAmber">
-                            ✨ 已啟用自動折算（目前目標階段無需琥珀）
+                        <template v-if="autoConvertAmber">
+                            <template v-if="gearResult.amberShortage > 0">
+                                ✨ 升級需 {{ gearResult.rawAmberNeeded }} 琥珀（庫存抵扣 {{ gearResult.amberUsedFromStock }}，不足 {{ gearResult.amberShortage }} 顆自動折算為 +{{ formatNumber(gearResult.amberBlueprintAdd) }} 張設計圖紙）
+                            </template>
+                            <template v-else-if="gearResult.rawAmberNeeded > 0">
+                                ✨ 琥珀庫存充足（{{ gearResult.rawAmberNeeded }} 顆全由庫存滿足，無需額外折算圖紙）
+                            </template>
+                            <template v-else>
+                                ✨ 已啟用自動折算（目前目標階段無需琥珀）
+                            </template>
                         </template>
                         <template v-else>
-                            💡 勾選後會將琥珀需求量 × 10 直接累加至設計圖紙
+                            💡 勾選後優先使用現有庫存琥珀，不足的部分自動以 1:10 累加至設計圖紙需求
                         </template>
                     </div>
                 </div>
@@ -1152,8 +1183,11 @@
                         <span class="lbl">升級需要：</span>
                         <div style="text-align: right;">
                             <span class="val">{{ formatNumber(gearResult.blueprint.needed) }}</span>
-                            <div v-if="autoConvertAmber && gearResult.rawAmberNeeded > 0" style="font-size: 12px; color: #b45309; font-weight: 800; margin-top: 1px;">
-                                (原需 {{ formatNumber(gearResult.rawBlueprintNeeded) }} + 琥珀折算 {{ formatNumber(gearResult.rawAmberNeeded * 10) }})
+                            <div v-if="autoConvertAmber && gearResult.amberShortage > 0" style="font-size: 12px; color: #b45309; font-weight: 800; margin-top: 1px;">
+                                (基礎 {{ formatNumber(gearResult.rawBlueprintNeeded) }} + 琥珀不足 {{ gearResult.amberShortage }} 顆折算 {{ formatNumber(gearResult.amberBlueprintAdd) }})
+                            </div>
+                            <div v-else-if="autoConvertAmber && gearResult.rawAmberNeeded > 0 && gearResult.amberShortage === 0" style="font-size: 12px; color: #15803d; font-weight: 800; margin-top: 1px;">
+                                (琥珀庫存充足，無需額外折算)
                             </div>
                         </div>
                     </div>
@@ -1178,7 +1212,7 @@
                 </div>
 
                 <!-- 月光琥珀 -->
-                <div class="mat-card" :class="(autoConvertAmber || gearResult.amber.diff <= 0) ? 'is-ready' : 'is-short'">
+                <div class="mat-card" :class="(!autoConvertAmber && gearResult.amber.diff > 0) ? 'is-short' : 'is-ready'">
                     <div class="mat-card-header">
                         <div class="mat-name-box">
                             <div class="mat-icon-wrapper">
@@ -1189,17 +1223,20 @@
                                 <div style="font-size: 12px; color: #64748b;">神話紅裝必備突破材料</div>
                             </div>
                         </div>
-                        <span class="status-badge" :class="autoConvertAmber ? 'badge-ready' : (gearResult.amber.diff <= 0 ? 'badge-ready' : 'badge-short')">
-                            <template v-if="autoConvertAmber">🔄 已折算為圖紙</template>
+                        <span class="status-badge" :class="(!autoConvertAmber && gearResult.amber.diff > 0) ? 'badge-short' : 'badge-ready'">
+                            <template v-if="autoConvertAmber">
+                                <template v-if="gearResult.amberShortage > 0">🔄 缺額已折算圖紙</template>
+                                <template v-else>✅ 庫存充足</template>
+                            </template>
                             <template v-else>{{ gearResult.amber.diff <= 0 ? '✅ 充足' : '⚠️ 缺料' }}</template>
                         </span>
                     </div>
                     <div class="mat-row">
                         <span class="lbl">升級需要：</span>
                         <div style="text-align: right;">
-                            <span class="val">{{ formatNumber(gearResult.amber.needed) }}</span>
-                            <div v-if="autoConvertAmber && gearResult.rawAmberNeeded > 0" style="font-size: 12px; color: #15803d; font-weight: 800; margin-top: 1px;">
-                                (原需 {{ formatNumber(gearResult.rawAmberNeeded) }}，已折算為 {{ formatNumber(gearResult.rawAmberNeeded * 10) }} 圖紙)
+                            <span class="val">{{ formatNumber(gearResult.rawAmberNeeded) }}</span>
+                            <div v-if="autoConvertAmber && gearResult.amberShortage > 0" style="font-size: 12px; color: #15803d; font-weight: 800; margin-top: 1px;">
+                                (扣除庫存 {{ gearResult.amberUsedFromStock }}，不足 {{ gearResult.amberShortage }} 顆由圖紙補足)
                             </div>
                         </div>
                     </div>
@@ -1209,9 +1246,14 @@
                     </div>
                     <div class="diff-box">
                         <span class="diff-lbl">差額結果：</span>
-                        <span class="diff-val" :class="(autoConvertAmber || gearResult.amber.diff <= 0) ? 'val-ok' : 'val-lack'">
+                        <span class="diff-val" :class="(!autoConvertAmber && gearResult.amber.diff > 0) ? 'val-lack' : 'val-ok'">
                             <template v-if="autoConvertAmber">
-                                <span style="color: #10b981;">已由圖紙完全替代</span>
+                                <template v-if="gearResult.amberShortage > 0">
+                                    <span style="color: #10b981;">缺 {{ gearResult.amberShortage }} 顆已由 +{{ formatNumber(gearResult.amberBlueprintAdd) }} 圖紙替代</span>
+                                </template>
+                                <template v-else>
+                                    <span style="color: #10b981;">庫存已滿足需求</span>
+                                </template>
                             </template>
                             <template v-else-if="gearResult.amber.diff <= 0">多出 +{{ formatNumber(Math.abs(gearResult.amber.diff)) }}</template>
                             <template v-else>還差 -{{ formatNumber(gearResult.amber.diff) }}</template>
@@ -4935,6 +4977,67 @@ createApp({
 
         const isStaticHost = window.location.hostname.includes('github.io') || window.location.protocol === 'file:'
 
+        // 快速查詢白名單中管理者設定的角色名稱與權限
+        const lookupPlayer = async (pid) => {
+            const trimmedPid = String(pid || '').trim()
+            if (!trimmedPid) {
+                playerName.value = ''
+                isWhitelisted.value = null
+                return null
+            }
+            if (isStaticHost) {
+                const localWl = getLocalWhitelist()
+                const found = localWl.find(item => String(item.player_id).trim() === trimmedPid)
+                if (found) {
+                    isWhitelisted.value = true
+                    playerName.value = found.player_name || ''
+                    return found
+                } else {
+                    isWhitelisted.value = false
+                    playerName.value = ''
+                    return null
+                }
+            }
+            try {
+                const res = await fetch(`/api/user?player_id=${encodeURIComponent(trimmedPid)}`)
+                if (res.ok) {
+                    const data = await res.json()
+                    if (data.whitelisted) {
+                        isWhitelisted.value = true
+                        playerName.value = data.player_name || ''
+                        return data
+                    } else {
+                        isWhitelisted.value = false
+                        playerName.value = ''
+                        return null
+                    }
+                }
+            } catch(e) {
+                const localWl = getLocalWhitelist()
+                const found = localWl.find(item => String(item.player_id).trim() === trimmedPid)
+                if (found) {
+                    isWhitelisted.value = true
+                    playerName.value = found.player_name || ''
+                    return found
+                } else {
+                    isWhitelisted.value = false
+                    playerName.value = ''
+                    return null
+                }
+            }
+            return null
+        }
+
+        watch(playerId, (newVal) => {
+            const pid = (newVal || '').trim()
+            if (pid) {
+                lookupPlayer(pid)
+            } else {
+                playerName.value = ''
+                isWhitelisted.value = null
+            }
+        })
+
         const loadUserSave = async (silent = false) => {
             const pid = (playerId.value || '').trim()
             if (!pid) {
@@ -4949,21 +5052,22 @@ createApp({
                 const found = localWl.find(item => String(item.player_id).trim() === pid)
                 if (found) {
                     isWhitelisted.value = true
-                    if (found.player_name) playerName.value = found.player_name
+                    playerName.value = found.player_name || pid
                     const localSaves = getLocalUserSaves()
                     const saveEntry = localSaves[pid]
                     if (saveEntry && saveEntry.data) {
                         applyUserData(saveEntry.data)
                         lastUpdated.value = saveEntry.updated_at || '已載入'
-                        showNotification(`歡迎回來 ${playerName.value || pid}，已載入存檔！`, 'success')
+                        showNotification(`歡迎回來【${playerName.value}】，已載入存檔！`, 'success')
                     } else {
-                        showNotification(`此 ID 已在白名單授權中！目前尚無存檔，可點擊「儲存進度」。`, 'info')
+                        showNotification(`ID【${pid}】已授權！角色：【${playerName.value}】，目前尚無存檔，可點擊「儲存進度」。`, 'info')
                     }
                     localStorage.setItem('wos_player_id', pid)
                     if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
                 } else {
                     isWhitelisted.value = false
-                    if (!silent) showNotification('⚠️ 此遊戲 ID 尚未開通存檔權限，請點擊「管理者設定」加入白名單！', 'error')
+                    playerName.value = ''
+                    if (!silent) showNotification('⚠️ 此遊戲 ID 尚未在管理者白名單中！請先聯絡管理者開通。', 'error')
                 }
                 isLoading.value = false
                 return
@@ -4975,19 +5079,20 @@ createApp({
                 const data = await res.json()
                 if (data.whitelisted) {
                     isWhitelisted.value = true
-                    if (data.player_name) playerName.value = data.player_name
+                    playerName.value = data.player_name || pid
                     if (data.updated_at) lastUpdated.value = data.updated_at
                     
                     if (data.data) {
                         applyUserData(data.data)
-                        showNotification(data.msg || `歡迎回來 ${playerName.value || pid}，已載入存檔！`, 'success')
+                        showNotification(data.msg || `歡迎回來【${playerName.value}】，已載入存檔！`, 'success')
                     } else {
-                        showNotification(data.msg || `已通過白名單授權！可點擊「儲存進度」保存數值。`, 'info')
+                        showNotification(data.msg || `已通過白名單授權！角色：【${playerName.value}】，可點擊「儲存進度」。`, 'info')
                     }
                     localStorage.setItem('wos_player_id', pid)
                     if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
                 } else {
                     isWhitelisted.value = false
+                    playerName.value = ''
                     showNotification(data.msg || '⚠️ 此遊戲 ID 尚未開通存檔權限，請聯絡管理員', 'error')
                 }
             } catch (err) {
@@ -4995,16 +5100,17 @@ createApp({
                 const found = localWl.find(item => String(item.player_id).trim() === pid)
                 if (found) {
                     isWhitelisted.value = true
-                    if (found.player_name) playerName.value = found.player_name
+                    playerName.value = found.player_name || pid
                     const localSaves = getLocalUserSaves()
                     const saveEntry = localSaves[pid]
                     if (saveEntry && saveEntry.data) {
                         applyUserData(saveEntry.data)
                         lastUpdated.value = saveEntry.updated_at || '本地存檔'
-                        showNotification(`歡迎回來 ${playerName.value || pid}，已載入存檔！`, 'success')
+                        showNotification(`歡迎回來【${playerName.value}】，已載入存檔！`, 'success')
                     }
                 } else {
                     isWhitelisted.value = false
+                    playerName.value = ''
                     if (!silent) showNotification('⚠️ 此遊戲 ID 尚未在白名單內', 'error')
                 }
             } finally {
@@ -5040,10 +5146,11 @@ createApp({
                 const found = localWl.find(item => String(item.player_id).trim() === pid)
                 if (found) {
                     isWhitelisted.value = true
+                    playerName.value = found.player_name || pid
                     const nowStr = new Date().toLocaleString()
                     const localSaves = getLocalUserSaves()
                     localSaves[pid] = {
-                        player_name: playerName.value || pid,
+                        player_name: playerName.value,
                         data: currentData,
                         updated_at: nowStr
                     }
@@ -5052,12 +5159,13 @@ createApp({
                     found.updated_at = nowStr
                     saveLocalWhitelist(localWl)
                     lastUpdated.value = nowStr
-                    showNotification(`【${playerName.value || pid}】進度已成功儲存！`, 'success')
+                    showNotification(`【${playerName.value}】進度已成功儲存！`, 'success')
                     localStorage.setItem('wos_player_id', pid)
                     if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
                 } else {
                     isWhitelisted.value = false
-                    showNotification('儲存失敗：此遊戲 ID 未在白名單內（請先至管理者設定新增）！', 'error')
+                    playerName.value = ''
+                    showNotification('儲存失敗：此遊戲 ID 未在管理者白名單內！', 'error')
                 }
                 isSaving.value = false
                 return
@@ -5078,32 +5186,34 @@ createApp({
                 const data = await res.json()
                 if (data.success) {
                     isWhitelisted.value = true
+                    if (data.player_name) playerName.value = data.player_name
                     lastUpdated.value = data.updated_at || new Date().toLocaleString()
-                    showNotification(data.msg || '進度已成功儲存至雲端！', 'success')
+                    showNotification(data.msg || `【${playerName.value}】進度已成功儲存至雲端！`, 'success')
                     localStorage.setItem('wos_player_id', pid)
                     if (playerName.value) localStorage.setItem('wos_player_name', playerName.value)
                 } else {
                     if (res.status === 403) isWhitelisted.value = false
-                    showNotification(data.msg || '儲存失敗，未獲授權', 'error')
+                    showNotification(data.msg || '儲存失敗，未獲白名單授權', 'error')
                 }
             } catch (err) {
                 const localWl = getLocalWhitelist()
                 const found = localWl.find(item => String(item.player_id).trim() === pid)
                 if (found) {
                     isWhitelisted.value = true
+                    playerName.value = found.player_name || pid
                     const nowStr = new Date().toLocaleString()
                     const localSaves = getLocalUserSaves()
                     localSaves[pid] = {
-                        player_name: playerName.value || pid,
+                        player_name: playerName.value,
                         data: currentData,
                         updated_at: nowStr
                     }
                     saveLocalUserSaves(localSaves)
                     lastUpdated.value = nowStr
-                    showNotification(`【${playerName.value || pid}】進度已成功儲存！`, 'success')
+                    showNotification(`【${playerName.value}】進度已成功儲存！`, 'success')
                 } else {
                     isWhitelisted.value = false
-                    showNotification('儲存失敗：此遊戲 ID 未在允許儲存的白名單內！', 'error')
+                    showNotification('儲存失敗：此遊戲 ID 未在白名單內！', 'error')
                 }
             } finally {
                 isSaving.value = false
@@ -5320,13 +5430,20 @@ createApp({
 
             const rawAmberNeeded = totalAmber
             const rawBlueprintNeeded = totalBlueprint
+            const amberHave = Number(gearInv.value.amber) || 0
 
             let effectiveBlueprint = totalBlueprint
             let effectiveAmber = totalAmber
+            let amberShortage = 0
+            let amberUsedFromStock = 0
+            let amberBlueprintAdd = 0
 
             if (autoConvertAmber.value) {
-                effectiveBlueprint = totalBlueprint + (totalAmber * 10)
-                effectiveAmber = 0
+                amberShortage = Math.max(0, rawAmberNeeded - amberHave)
+                amberUsedFromStock = Math.min(rawAmberNeeded, amberHave)
+                amberBlueprintAdd = amberShortage * 10
+                effectiveBlueprint = rawBlueprintNeeded + amberBlueprintAdd
+                effectiveAmber = amberUsedFromStock
             }
 
             const calcItem = (needed, have) => {
@@ -5338,10 +5455,22 @@ createApp({
             return {
                 rawAmberNeeded,
                 rawBlueprintNeeded,
+                amberShortage,
+                amberUsedFromStock,
+                amberBlueprintAdd,
                 alloy: calcItem(totalAlloy, gearInv.value.alloy),
                 polishing: calcItem(totalPolishing, gearInv.value.polishing),
                 blueprint: calcItem(effectiveBlueprint, gearInv.value.blueprint),
-                amber: calcItem(effectiveAmber, gearInv.value.amber)
+                amber: autoConvertAmber.value
+                    ? {
+                        needed: rawAmberNeeded,
+                        have: amberHave,
+                        shortage: amberShortage,
+                        usedFromStock: amberUsedFromStock,
+                        diff: (!autoConvertAmber.value && (rawAmberNeeded - amberHave) > 0) ? (rawAmberNeeded - amberHave) : 0,
+                        percent: 100
+                    }
+                    : calcItem(totalAmber, gearInv.value.amber)
             }
         })
 

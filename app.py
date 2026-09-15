@@ -184,6 +184,8 @@ def save_user_data():
         if not wl_row:
             return jsonify({"success": False, "msg": "抱歉，此遊戲 ID 未在允許儲存的白名單內！"}), 403
 
+        wl_name = wl_row[1] if is_pg else wl_row['player_name']
+        final_player_name = wl_name or player_name or player_id
         data_json = json.dumps(data, ensure_ascii=False)
         now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -196,7 +198,7 @@ def save_user_data():
                     player_name = EXCLUDED.player_name,
                     data_json = EXCLUDED.data_json,
                     updated_at = EXCLUDED.updated_at;
-            ''', (player_id, player_name, data_json, now_str))
+            ''', (player_id, final_player_name, data_json, now_str))
         else:
             cursor.execute('''
                 INSERT INTO user_saves (player_id, player_name, data_json, updated_at)
@@ -205,12 +207,13 @@ def save_user_data():
                     player_name = excluded.player_name,
                     data_json = excluded.data_json,
                     updated_at = excluded.updated_at;
-            ''', (player_id, player_name, data_json, now_str))
+            ''', (player_id, final_player_name, data_json, now_str))
         
         conn.commit()
         return jsonify({
             "success": True,
-            "msg": f"【{player_name or player_id}】進度已成功儲存至雲端！",
+            "player_name": final_player_name,
+            "msg": f"【{final_player_name}】進度已成功儲存至雲端！",
             "updated_at": now_str
         })
     except Exception as e:
