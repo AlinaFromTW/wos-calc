@@ -648,15 +648,15 @@
                     <!-- 強化等級 (右上角 +XX) -->
                     <div style="background: rgba(15,23,42,0.6); padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid rgba(255,255,255,0.06);">
                         <div style="font-size: 12.5px; font-weight: 700; color: #a855f7; margin-bottom: 6px; display: flex; justify-content: space-between;">
-                            <span>🔩 強化等級 (右上角 +)</span>
-                            <span style="color: #94a3b8; font-size: 11px;">(消耗強化經驗 / 螺絲)</span>
+                            <span>🔩 強化等級 (+20綠/+40藍/+60紫/+80橘/+100紅)</span>
+                            <span style="color: #94a3b8; font-size: 11px;">(消耗強化經驗 XP)</span>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                             <div>
                                 <label class="form-label" style="font-size: 11px; margin-bottom: 2px;">當前強化：</label>
                                 <select v-model.number="slot.currentEnhance" class="form-input" style="padding: 6px 8px; font-size: 12.5px; background: #0f172a;">
                                     <option v-for="e in ENHANCE_LEVELS" :key="e.level" :value="e.level">
-                                        +{{ e.level }}
+                                        +{{ e.level }} {{ e.tierLabel }}
                                     </option>
                                 </select>
                             </div>
@@ -664,11 +664,17 @@
                                 <label class="form-label" style="font-size: 11px; margin-bottom: 2px;">目標強化：</label>
                                 <select v-model.number="slot.targetEnhance" class="form-input" style="padding: 6px 8px; font-size: 12.5px; background: #0f172a; border-color: #a855f7;">
                                     <option v-for="e in ENHANCE_LEVELS" :key="e.level" :value="e.level">
-                                        +{{ e.level }}
+                                        +{{ e.level }} {{ e.tierLabel }}
                                     </option>
                                 </select>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- 屬性加成即時預覽 -->
+                    <div style="background: rgba(2,132,199,0.1); border: 1px dashed rgba(56,189,248,0.3); border-radius: 6px; padding: 6px 10px; margin-bottom: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
+                        <span style="color: #94a3b8;">📈 兵種屬性加成：</span>
+                        <span style="color: #38bdf8; font-weight: 800;">{{ slot.attrName }} <b>+{{ getSlotAttrBonus(slot) }}%</b></span>
                     </div>
 
                     <!-- Single Slot Material Needs Preview -->
@@ -820,28 +826,29 @@ createApp({
         ]
 
         // 2. 強化等級 (右上角 +0 ~ +100): 消耗「裝備強化經驗 (XP / 螺絲)」
+        // 階級分色：+20綠 / +40藍 / +60紫 / +80橘 / +100紅
         const ENHANCE_LEVELS = [
-            { level: 0, cumScrew: 0 },
-            { level: 5, cumScrew: 1000 },
-            { level: 10, cumScrew: 2500 },
-            { level: 15, cumScrew: 5000 },
-            { level: 20, cumScrew: 8500 },
-            { level: 25, cumScrew: 13000 },
-            { level: 30, cumScrew: 19000 },
-            { level: 35, cumScrew: 26500 },
-            { level: 40, cumScrew: 35500 },
-            { level: 45, cumScrew: 46000 },
-            { level: 50, cumScrew: 58000 },
-            { level: 55, cumScrew: 72000 },
-            { level: 60, cumScrew: 88000 },
-            { level: 65, cumScrew: 106000 },
-            { level: 70, cumScrew: 126000 },
-            { level: 75, cumScrew: 148000 },
-            { level: 80, cumScrew: 173000 },
-            { level: 85, cumScrew: 201000 },
-            { level: 90, cumScrew: 232000 },
-            { level: 95, cumScrew: 266000 },
-            { level: 100, cumScrew: 305000 }
+            { level: 0, tierLabel: '(白階 / 初始)', cumScrew: 0 },
+            { level: 5, tierLabel: '', cumScrew: 1000 },
+            { level: 10, tierLabel: '', cumScrew: 2500 },
+            { level: 15, tierLabel: '', cumScrew: 5000 },
+            { level: 20, tierLabel: '🟩 (綠階滿)', cumScrew: 8500 },
+            { level: 25, tierLabel: '', cumScrew: 13000 },
+            { level: 30, tierLabel: '', cumScrew: 19000 },
+            { level: 35, tierLabel: '', cumScrew: 26500 },
+            { level: 40, tierLabel: '🟦 (藍階滿)', cumScrew: 35500 },
+            { level: 45, tierLabel: '', cumScrew: 46000 },
+            { level: 50, tierLabel: '', cumScrew: 58000 },
+            { level: 55, tierLabel: '', cumScrew: 72000 },
+            { level: 60, tierLabel: '🟪 (紫階滿)', cumScrew: 88000 },
+            { level: 65, tierLabel: '', cumScrew: 106000 },
+            { level: 70, tierLabel: '', cumScrew: 126000 },
+            { level: 75, tierLabel: '', cumScrew: 148000 },
+            { level: 80, tierLabel: '🟧 (橘階滿)', cumScrew: 173000 },
+            { level: 85, tierLabel: '', cumScrew: 201000 },
+            { level: 90, tierLabel: '', cumScrew: 232000 },
+            { level: 95, tierLabel: '', cumScrew: 266000 },
+            { level: 100, tierLabel: '🟥 (紅階神話滿級)', cumScrew: 305000 }
         ]
 
         const heroType = ref('infantry')
@@ -849,28 +856,38 @@ createApp({
 
         const heroSlots = ref({
             infantry: {
-                helmet: { name: '戰盔 (頭盔)', icon: '🪖', attrDesc: '步兵生命 (前排核心)', priority: 1, currentMastery: 13, targetMastery: 15, currentEnhance: 60, targetEnhance: 80 },
-                chest:  { name: '胸甲 (皮帶)', icon: '🎽', attrDesc: '步兵防禦 (減免承傷)', priority: 1, currentMastery: 15, targetMastery: 15, currentEnhance: 75, targetEnhance: 80 },
-                gloves: { name: '護手 (手套)', icon: '🧤', attrDesc: '步兵攻擊 (次要屬性)', priority: 2, currentMastery: 15, targetMastery: 15, currentEnhance: 55, targetEnhance: 60 },
-                boots:  { name: '戰靴 (靴子)', icon: '🥾', attrDesc: '步兵致命 (次要屬性)', priority: 2, currentMastery: 12, targetMastery: 15, currentEnhance: 20, targetEnhance: 60 }
+                helmet: { name: '戰盔 (頭盔)', icon: '🪖', attrDesc: '步兵生命 (前排核心)', attrName: '步兵生命 (HP)', priority: 1, currentMastery: 13, targetMastery: 15, currentEnhance: 60, targetEnhance: 80 },
+                chest:  { name: '胸甲 (皮帶)', icon: '🎽', attrDesc: '步兵防禦 (減免承傷)', attrName: '步兵防禦 (DEF)', priority: 1, currentMastery: 15, targetMastery: 15, currentEnhance: 75, targetEnhance: 80 },
+                gloves: { name: '護手 (手套)', icon: '🧤', attrDesc: '步兵攻擊 (次要屬性)', attrName: '步兵攻擊 (ATK)', priority: 2, currentMastery: 15, targetMastery: 15, currentEnhance: 55, targetEnhance: 60 },
+                boots:  { name: '戰靴 (靴子)', icon: '🥾', attrDesc: '步兵致命 (次要屬性)', attrName: '步兵致命 (Lethality)', priority: 2, currentMastery: 12, targetMastery: 15, currentEnhance: 20, targetEnhance: 60 }
             },
             marksman: {
-                gloves: { name: '護手 (手套)', icon: '🧤', attrDesc: '射手攻擊 (主力輸出)', priority: 1, currentMastery: 15, targetMastery: 20, currentEnhance: 60, targetEnhance: 100 },
-                boots:  { name: '戰靴 (靴子)', icon: '🥾', attrDesc: '射手致命 (極致暴擊)', priority: 1, currentMastery: 15, targetMastery: 20, currentEnhance: 60, targetEnhance: 100 },
-                helmet: { name: '戰盔 (頭盔)', icon: '🪖', attrDesc: '射手生命 (次要屬性)', priority: 2, currentMastery: 5, targetMastery: 10, currentEnhance: 20, targetEnhance: 40 },
-                chest:  { name: '胸甲 (皮帶)', icon: '🎽', attrDesc: '射手防禦 (次要屬性)', priority: 2, currentMastery: 5, targetMastery: 10, currentEnhance: 20, targetEnhance: 40 }
+                gloves: { name: '護手 (手套)', icon: '🧤', attrDesc: '射手攻擊 (主力輸出)', attrName: '射手攻擊 (ATK)', priority: 1, currentMastery: 15, targetMastery: 20, currentEnhance: 60, targetEnhance: 100 },
+                boots:  { name: '戰靴 (靴子)', icon: '🥾', attrDesc: '射手致命 (極致暴擊)', attrName: '射手致命 (Lethality)', priority: 1, currentMastery: 15, targetMastery: 20, currentEnhance: 60, targetEnhance: 100 },
+                helmet: { name: '戰盔 (頭盔)', icon: '🪖', attrDesc: '射手生命 (次要屬性)', attrName: '射手生命 (HP)', priority: 2, currentMastery: 5, targetMastery: 10, currentEnhance: 20, targetEnhance: 40 },
+                chest:  { name: '胸甲 (皮帶)', icon: '🎽', attrDesc: '射手防禦 (次要屬性)', attrName: '射手防禦 (DEF)', priority: 2, currentMastery: 5, targetMastery: 10, currentEnhance: 20, targetEnhance: 40 }
             },
             lancer: {
-                gloves: { name: '護手 (手套)', icon: '🧤', attrDesc: '槍兵攻擊 (秒殺破防)', priority: 1, currentMastery: 15, targetMastery: 20, currentEnhance: 60, targetEnhance: 100 },
-                boots:  { name: '戰靴 (靴子)', icon: '🥾', attrDesc: '槍兵致命 (穿透打擊)', priority: 1, currentMastery: 15, targetMastery: 20, currentEnhance: 60, targetEnhance: 100 },
-                helmet: { name: '戰盔 (頭盔)', icon: '🪖', attrDesc: '槍兵生命 (次要屬性)', priority: 2, currentMastery: 5, targetMastery: 10, currentEnhance: 20, targetEnhance: 40 },
-                chest:  { name: '胸甲 (皮帶)', icon: '🎽', attrDesc: '槍兵防禦 (次要屬性)', priority: 2, currentMastery: 5, targetMastery: 10, currentEnhance: 20, targetEnhance: 40 }
+                gloves: { name: '護手 (手套)', icon: '🧤', attrDesc: '槍兵攻擊 (秒殺破防)', attrName: '槍兵攻擊 (ATK)', priority: 1, currentMastery: 15, targetMastery: 20, currentEnhance: 60, targetEnhance: 100 },
+                boots:  { name: '戰靴 (靴子)', icon: '🥾', attrDesc: '槍兵致命 (穿透打擊)', attrName: '槍兵致命 (Lethality)', priority: 1, currentMastery: 15, targetMastery: 20, currentEnhance: 60, targetEnhance: 100 },
+                helmet: { name: '戰盔 (頭盔)', icon: '🪖', attrDesc: '槍兵生命 (次要屬性)', attrName: '槍兵生命 (HP)', priority: 2, currentMastery: 5, targetMastery: 10, currentEnhance: 20, targetEnhance: 40 },
+                chest:  { name: '胸甲 (皮帶)', icon: '🎽', attrDesc: '槍兵防禦 (次要屬性)', attrName: '槍兵防禦 (DEF)', priority: 2, currentMastery: 5, targetMastery: 10, currentEnhance: 20, targetEnhance: 40 }
             }
         })
 
         const formatNum = (num) => {
             if (num === undefined || num === null) return '0'
             return Math.round(num).toLocaleString()
+        }
+
+        const getSlotAttrBonus = (slot) => {
+            if (!slot) return 0
+            // 強化加成：+1 級約 +3.2%
+            const enhanceBonus = (slot.targetEnhance || 0) * 3.2
+            // 專精加成：每 1 級專精約 +20%~+25%
+            const masteryBonus = (slot.targetMastery || 0) * 22.5
+            const total = Math.round(enhanceBonus + masteryBonus)
+            return total
         }
 
         const getSingleSlotCost = (slot) => {
@@ -1229,7 +1246,7 @@ createApp({
             newPlayerId, newPlayerName, newPlayerNote,
             showEditModal, editPlayerId, editPlayerName, editPlayerNote,
             oldPass, newPass, confirmPass,
-            MASTERY_LEVELS, ENHANCE_LEVELS, heroType, heroInv, heroSlots, formatNum, getSingleSlotCost, heroResult, applyHeroPreset, syncAllHeroSlots, clearHeroInv,
+            MASTERY_LEVELS, ENHANCE_LEVELS, heroType, heroInv, heroSlots, formatNum, getSlotAttrBonus, getSingleSlotCost, heroResult, applyHeroPreset, syncAllHeroSlots, clearHeroInv,
             login, logout, addPlayer, openEditModal, saveEditPlayer, deletePlayer, downloadBackup, handleFileUpload, changePassword
         }
     }
