@@ -1043,10 +1043,13 @@
                     <h3 style="font-size: 18px; font-weight: 900; color: #0f172a;">🎽 6 部件套裝勾選設定（已選 {{ enabledSlotsCount }} 件）</h3>
                     <p style="font-size: 13.5px; color: #64748b;">自由勾選要計算的部位，各部位可各自設定不同起點與目標。</p>
                 </div>
-                <div style="display: flex; gap: 6px; flex-wrap: wrap; width: 100%;">
-                    <button type="button" class="btn-action" style="background:#0f172a; flex: 1;" @click="selectPresetSlots('all')">全選 6 件</button>
-                    <button type="button" class="btn-action" style="background:#0284c7; flex: 1;" @click="selectPresetSlots('first3')">選前 3 件</button>
-                    <button type="button" class="btn-action" style="background:#0284c7; flex: 1;" @click="selectPresetSlots('last3')">選後 3 件</button>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%; align-items: center;">
+                    <span style="font-size: 13px; font-weight: 800; color: #475569;">⚡ 快速勾選：</span>
+                    <button type="button" class="btn-action" style="background:#0f172a;" @click="selectPresetSlots('all')">全選 6 件</button>
+                    <button type="button" class="btn-action" style="background:#64748b;" @click="selectPresetSlots('none')">全不選</button>
+                    <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetSlots('infantry')">🛡️ 盾兵 (外套+長褲)</button>
+                    <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetSlots('lancer')">⚔️ 矛兵 (帽子+手錶)</button>
+                    <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetSlots('marksman')">🏹 射手 (戒指+手杖)</button>
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px;">
@@ -1054,8 +1057,11 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
                             <input type="checkbox" v-model="slot.enabled" style="width: 20px; height: 20px; cursor: pointer;">
-                            <span style="font-size: 22px;">{{ slot.icon }}</span>
-                            <span style="font-weight: 800; font-size: 16px; color: #0f172a;">{{ slot.name }}</span>
+                            <span style="font-size: 24px;">{{ slot.icon }}</span>
+                            <div>
+                                <span style="font-weight: 800; font-size: 16px; color: #0f172a;">{{ slot.name }}</span>
+                                <span style="font-size: 12px; color: #0284c7; font-weight: 700; margin-left: 6px;">{{ slot.troop }}</span>
+                            </div>
                         </label>
                         <span v-if="slot.enabled" style="font-size: 12.5px; color: #0284c7; font-weight: 800; background: #e0f2fe; padding: 2px 8px; border-radius: 6px;">
                             需升 {{ Math.max(0, slot.targetId - slot.currentId) }} 階
@@ -5109,32 +5115,32 @@ createApp({
         const selectedTargetGemId = ref(4)    // 4寶
 
         const gearSlots = ref([
-            { name: '戰術頭盔', icon: '🪖', currentId: 68, targetId: 78, enabled: true },
-            { name: '防彈胸甲', icon: '🎽', currentId: 68, targetId: 78, enabled: true },
-            { name: '戰術戒指', icon: '💍', currentId: 68, targetId: 78, enabled: true },
-            { name: '突擊武器', icon: '⚔️', currentId: 68, targetId: 78, enabled: false },
-            { name: '戰術長褲', icon: '👖', currentId: 68, targetId: 78, enabled: false },
-            { name: '戰術皮靴', icon: '🥾', currentId: 68, targetId: 78, enabled: false }
+            { name: '外套 (衣服)', troop: '盾兵 (步兵)', icon: '🧥', currentId: 68, targetId: 78, enabled: true },
+            { name: '長褲 (褲子)', troop: '盾兵 (步兵)', icon: '👖', currentId: 68, targetId: 78, enabled: true },
+            { name: '帽子 (冠冕)', troop: '矛兵 (槍兵)', icon: '🎩', currentId: 68, targetId: 78, enabled: true },
+            { name: '手錶 (懷錶)', troop: '矛兵 (槍兵)', icon: '⌚', currentId: 68, targetId: 78, enabled: false },
+            { name: '戒指', troop: '射手 (弓兵)', icon: '💍', currentId: 68, targetId: 78, enabled: false },
+            { name: '手杖', troop: '射手 (弓兵)', icon: '🦯', currentId: 68, targetId: 78, enabled: false }
         ])
 
         const enabledSlotsCount = computed(() => gearSlots.value.filter(s => s.enabled).length)
 
         const selectPresetSlots = (type) => {
-            if (type === 'all') {
-                gearSlots.value.forEach(s => s.enabled = true)
-            } else if (type === 'first3') {
-                gearSlots.value.forEach((s, idx) => s.enabled = idx < 3)
-            } else if (type === 'last3') {
-                gearSlots.value.forEach((s, idx) => s.enabled = idx >= 3)
-            }
+            gearSlots.value.forEach((s, idx) => {
+                if (type === 'all') s.enabled = true
+                else if (type === 'none') s.enabled = false
+                else if (type === 'infantry') s.enabled = (idx === 0 || idx === 1)
+                else if (type === 'lancer') s.enabled = (idx === 2 || idx === 3)
+                else if (type === 'marksman') s.enabled = (idx === 4 || idx === 5)
+            })
         }
 
         // 18 Gems Multi-Slot Mode State
         const defaultGemSlots = () => [
             {
-                name: '戰術頭盔',
-                troop: '盾兵 (步防)',
-                icon: '🪖',
+                name: '外套 (衣服)',
+                troop: '盾兵 (綠寶石)',
+                icon: '🧥',
                 gems: [
                     { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: true },
                     { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: true },
@@ -5142,9 +5148,9 @@ createApp({
                 ]
             },
             {
-                name: '防彈胸甲',
-                troop: '盾兵 (步生)',
-                icon: '🎽',
+                name: '長褲 (褲子)',
+                troop: '盾兵 (綠寶石)',
+                icon: '👖',
                 gems: [
                     { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: true },
                     { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: true },
@@ -5152,8 +5158,28 @@ createApp({
                 ]
             },
             {
-                name: '戰術戒指',
-                troop: '槍兵 (矛攻)',
+                name: '帽子 (冠冕)',
+                troop: '矛兵 (藍寶石)',
+                icon: '🎩',
+                gems: [
+                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
+                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: false },
+                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: false }
+                ]
+            },
+            {
+                name: '手錶 (懷錶)',
+                troop: '矛兵 (藍寶石)',
+                icon: '⌚',
+                gems: [
+                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
+                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: false },
+                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: false }
+                ]
+            },
+            {
+                name: '戒指',
+                troop: '射手 (琥珀寶石)',
                 icon: '💍',
                 gems: [
                     { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
@@ -5162,29 +5188,9 @@ createApp({
                 ]
             },
             {
-                name: '突擊武器',
-                troop: '槍兵 (矛殺)',
-                icon: '⚔️',
-                gems: [
-                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
-                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: false },
-                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: false }
-                ]
-            },
-            {
-                name: '戰術長褲',
-                troop: '弓兵 (射生)',
-                icon: '👖',
-                gems: [
-                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
-                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: false },
-                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: false }
-                ]
-            },
-            {
-                name: '戰術皮靴',
-                troop: '弓兵 (射殺)',
-                icon: '🥾',
+                name: '手杖',
+                troop: '射手 (琥珀寶石)',
+                icon: '🦯',
                 gems: [
                     { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
                     { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: false },
@@ -5359,14 +5365,35 @@ createApp({
             if (d.selectedTargetGearId !== undefined) selectedTargetGearId.value = d.selectedTargetGearId
             if (d.selectedCurrentGemId !== undefined) selectedCurrentGemId.value = d.selectedCurrentGemId
             if (d.selectedTargetGemId !== undefined) selectedTargetGemId.value = d.selectedTargetGemId
-            if (d.gearSlots) gearSlots.value = d.gearSlots
+            if (d.gearSlots && Array.isArray(d.gearSlots)) {
+                gearSlots.value.forEach((slot, idx) => {
+                    if (d.gearSlots[idx]) {
+                        if (d.gearSlots[idx].currentId !== undefined) slot.currentId = d.gearSlots[idx].currentId
+                        if (d.gearSlots[idx].targetId !== undefined) slot.targetId = d.gearSlots[idx].targetId
+                        if (d.gearSlots[idx].enabled !== undefined) slot.enabled = d.gearSlots[idx].enabled
+                    }
+                })
+            }
             if (d.gearInv) gearInv.value = d.gearInv
             if (d.gemInv) gemInv.value = d.gemInv
             if (typeof d.autoConvertAmber === 'boolean') autoConvertAmber.value = d.autoConvertAmber
             if (typeof d.showGemSubStages === 'boolean') showGemSubStages.value = d.showGemSubStages
             if (typeof d.autoConvertTome === 'boolean') autoConvertTome.value = d.autoConvertTome
             if (d.gemMode) gemMode.value = d.gemMode
-            if (d.gemSlots) gemSlots.value = d.gemSlots
+            if (d.gemSlots && Array.isArray(d.gemSlots)) {
+                gemSlots.value.forEach((slot, idx) => {
+                    if (d.gemSlots[idx] && Array.isArray(d.gemSlots[idx].gems)) {
+                        slot.gems.forEach((g, gIdx) => {
+                            const savedG = d.gemSlots[idx].gems[gIdx]
+                            if (savedG) {
+                                if (savedG.currentId !== undefined) g.currentId = savedG.currentId
+                                if (savedG.targetId !== undefined) g.targetId = savedG.targetId
+                                if (savedG.enabled !== undefined) g.enabled = savedG.enabled
+                            }
+                        })
+                    }
+                })
+            }
         }
 
         const API_BASE = (window.location.hostname.includes('onrender.com') || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
