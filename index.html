@@ -1557,7 +1557,7 @@
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                                 <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
                                     <input type="checkbox" v-model="gem.enabled" style="width: 18px; height: 18px; cursor: pointer;">
-                                    <span style="font-weight: 800; font-size: 14px; color: #0f172a;">💎 寶石 #{{ gIdx + 1 }}</span>
+                                    <span style="font-weight: 800; font-size: 14px; color: #0f172a;">{{ slot.gemColor ? slot.gemColor + ' #' + (gIdx + 1) : '💎 寶石 #' + (gIdx + 1) }}</span>
                                 </label>
                                 <span v-if="gem.enabled" style="font-size: 12px; font-weight: 800; padding: 2px 8px; border-radius: 6px;"
                                       :style="gem.targetId > gem.currentId ? 'background: #e0f2fe; color: #0284c7;' : 'background: #f1f5f9; color: #64748b;'">
@@ -5139,7 +5139,8 @@ createApp({
         const defaultGemSlots = () => [
             {
                 name: '外套 (衣服)',
-                troop: '盾兵 (綠寶石)',
+                troop: '🛡️ 盾兵 (綠寶石)',
+                gemColor: '🟢 綠寶',
                 icon: '🧥',
                 gems: [
                     { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: true },
@@ -5149,7 +5150,8 @@ createApp({
             },
             {
                 name: '長褲 (褲子)',
-                troop: '盾兵 (綠寶石)',
+                troop: '🛡️ 盾兵 (綠寶石)',
+                gemColor: '🟢 綠寶',
                 icon: '👖',
                 gems: [
                     { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: true },
@@ -5159,7 +5161,8 @@ createApp({
             },
             {
                 name: '帽子 (冠冕)',
-                troop: '矛兵 (藍寶石)',
+                troop: '⚔️ 矛兵 (藍寶石)',
+                gemColor: '🔵 藍寶',
                 icon: '🎩',
                 gems: [
                     { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
@@ -5169,7 +5172,8 @@ createApp({
             },
             {
                 name: '手錶 (懷錶)',
-                troop: '矛兵 (藍寶石)',
+                troop: '⚔️ 矛兵 (藍寶石)',
+                gemColor: '🔵 藍寶',
                 icon: '⌚',
                 gems: [
                     { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
@@ -5179,7 +5183,8 @@ createApp({
             },
             {
                 name: '戒指',
-                troop: '射手 (琥珀寶石)',
+                troop: '🏹 射手 (琥珀寶石)',
+                gemColor: '🟡 琥珀寶',
                 icon: '💍',
                 gems: [
                     { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
@@ -5189,7 +5194,8 @@ createApp({
             },
             {
                 name: '手杖',
-                troop: '射手 (琥珀寶石)',
+                troop: '🏹 射手 (琥珀寶石)',
+                gemColor: '🟡 琥珀寶',
                 icon: '🦯',
                 gems: [
                     { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
