@@ -1350,17 +1350,31 @@
                 <span class="mult-lbl">🎯 寶石計算顆數：</span>
                 <div class="mult-btns">
                     <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 1}" @click="gemsMultiplier = 1">1 顆 (單顆)</button>
-                    <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 2}" @click="gemsMultiplier = 2">2 顆</button>
-                    <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 3}" @click="gemsMultiplier = 3">3 顆 (半套)</button>
-                    <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 4}" @click="gemsMultiplier = 4">4 顆</button>
-                    <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 5}" @click="gemsMultiplier = 5">5 顆</button>
-                    <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 6}" @click="gemsMultiplier = 6">6 顆 (全套)</button>
+                    <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 3}" @click="gemsMultiplier = 3">3 顆 (單部位)</button>
+                    <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 6}" @click="gemsMultiplier = 6">6 顆 (單兵種)</button>
+                    <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 18}" @click="gemsMultiplier = 18">18 顆 (全身6件滿套)</button>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px; margin-left: 8px;">
+                    <span style="font-size: 13px; color: #64748b; font-weight: bold;">自訂:</span>
+                    <input type="number" v-model.number="gemsMultiplier" min="1" max="18" style="width: 55px; padding: 4px 6px; border: 1.5px solid #cbd5e1; border-radius: 6px; font-weight: 800; text-align: center; color: #0284c7;">
+                    <span style="font-size: 13px; color: #64748b;">顆</span>
                 </div>
             </div>
         </div>
 
         <!-- Gems Selectors -->
         <div class="card">
+            <!-- Substage Toggle Switch -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #e2e8f0;">
+                <div style="font-size: 13px; color: #64748b;">
+                    💡 提示：全身 6 部位共有 18 顆寶石。預設顯示整級大階，如需卡在進度條時補差額可開啟細項。
+                </div>
+                <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: #0369a1; font-weight: 700; background: #f0f9ff; padding: 4px 12px; border-radius: 20px; border: 1px solid #bae6fd;">
+                    <input type="checkbox" v-model="showGemSubStages" style="cursor: pointer; width: 15px; height: 15px;">
+                    🔍 顯示細項子階進度條 (0~3階微調)
+                </label>
+            </div>
+
             <div class="stage-selector-grid">
                 <!-- Current -->
                 <div class="stage-box current-box">
@@ -1369,7 +1383,7 @@
                     </div>
                     <label class="select-field-label">選擇目前階級：</label>
                     <select v-model.number="selectedCurrentGemId" class="large-select">
-                        <option v-for="st in gemStages" :key="st.id" :value="st.id">{{ st.label }}</option>
+                        <option v-for="st in displayedGemStages" :key="st.id" :value="st.id">{{ st.label }}</option>
                     </select>
                     <div class="stage-stats-preview" v-if="currentGemStage">
                         <div class="stat-pill">⚔️ 屬性: <b>{{ currentGemStage.attr_bonus || '+0%' }}</b></div>
@@ -1395,7 +1409,7 @@
                     </div>
                     <label class="select-field-label">選擇目標階級：</label>
                     <select v-model.number="selectedTargetGemId" class="large-select">
-                        <option v-for="st in gemStages" :key="st.id" :value="st.id">{{ st.label }}</option>
+                        <option v-for="st in displayedGemStages" :key="st.id" :value="st.id">{{ st.label }}</option>
                     </select>
                     <div class="stage-stats-preview" v-if="targetGemStage">
                         <div class="stat-pill">⚔️ 屬性: <b>{{ targetGemStage.attr_bonus || '+0%' }}</b></div>
@@ -1408,15 +1422,15 @@
             <div class="shortcuts-row">
                 <span class="shortcuts-title">⚡ 快速跳轉：</span>
                 <button type="button" class="shortcut-btn" @click="setTargetGemOffset(1)">+1 階</button>
-                <button type="button" class="shortcut-btn" @click="setTargetGemLevel(3)">3寶</button>
                 <button type="button" class="shortcut-btn" @click="setTargetGemLevel(4)">4寶</button>
-                <button type="button" class="shortcut-btn" @click="setTargetGemLevel(5)">5寶</button>
                 <button type="button" class="shortcut-btn" @click="setTargetGemLevel(6)">6寶</button>
-                <button type="button" class="shortcut-btn" @click="setTargetGemLevel(7)">7寶</button>
                 <button type="button" class="shortcut-btn" @click="setTargetGemLevel(8)">8寶</button>
                 <button type="button" class="shortcut-btn" @click="setTargetGemLevel(9)">9寶</button>
                 <button type="button" class="shortcut-btn" @click="setTargetGemLevel(10)">10寶</button>
                 <button type="button" class="shortcut-btn" @click="setTargetGemLevel(11)">11寶</button>
+                <button type="button" class="shortcut-btn" @click="setTargetGemLevel(12)">12寶</button>
+                <button type="button" class="shortcut-btn" @click="setTargetGemLevel(13)">13寶</button>
+                <button type="button" class="shortcut-btn" @click="setTargetGemLevel(15)">15寶</button>
             </div>
         </div>
 
@@ -1430,7 +1444,11 @@
                     </h3>
                     <p class="section-desc">輸入寶石手冊、圖紙與秘典庫存即時試算。</p>
                 </div>
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: #b45309; font-weight: 700; background: #fef3c7; padding: 4px 12px; border-radius: 20px; border: 1px solid #fde68a;">
+                        <input type="checkbox" v-model="autoConvertTome" style="cursor: pointer; width: 15px; height: 15px;">
+                        🔄 啟用手冊/圖紙折算寶典 (40:1)
+                    </label>
                     <span class="auto-save-tip">💾 自動儲存</span>
                     <button type="button" class="btn-action btn-secondary" style="padding: 6px 12px; font-size: 13px;" @click="clearGemInv">清空</button>
                 </div>
@@ -1446,7 +1464,7 @@
                             </div>
                             <div>
                                 <div class="mat-name">寶石手冊</div>
-                                <div style="font-size: 12px; color: #64748b;">領主寶石必備手冊/寶典</div>
+                                <div style="font-size: 12px; color: #64748b;">領主寶石必備手冊</div>
                             </div>
                         </div>
                         <span class="status-badge" :class="gemResult.guide.diff <= 0 ? 'badge-ready' : 'badge-short'">
@@ -1517,7 +1535,7 @@
                     </div>
                 </div>
 
-                <!-- 寶石秘典 / 水晶 -->
+                <!-- 寶石秘典 / 寶典 -->
                 <div class="mat-card" :class="gemResult.crystal.diff <= 0 ? 'is-ready' : 'is-short'">
                     <div class="mat-card-header">
                         <div class="mat-name-box">
@@ -1525,8 +1543,8 @@
                                 <img :src="ICONS.gem_crystal" class="mat-img" alt="寶石秘典">
                             </div>
                             <div>
-                                <div class="mat-name">寶石秘典 / 水晶</div>
-                                <div style="font-size: 12px; color: #64748b;">領主寶石高級突破秘典</div>
+                                <div class="mat-name">寶石秘典 / 寶典</div>
+                                <div style="font-size: 12px; color: #64748b;">領主寶石突破秘典(11寶起)</div>
                             </div>
                         </div>
                         <span class="status-badge" :class="gemResult.crystal.diff <= 0 ? 'badge-ready' : 'badge-short'">
@@ -1548,8 +1566,12 @@
                             <template v-else>還差 -{{ formatNumber(gemResult.crystal.diff) }}</template>
                         </span>
                     </div>
+                    <!-- 折算提示 -->
+                    <div v-if="autoConvertTome && gemResult.convertedTomes > 0" style="font-size: 12px; color: #b45309; background: #fffbeb; padding: 6px 10px; border-radius: 6px; margin: 6px 0; border: 1px dashed #fcd34d; line-height: 1.4;">
+                        💡 <b>每週兌換折算：</b>已自動將多餘手冊/圖紙折算 <b>+{{ gemResult.convertedTomes }}</b> 本寶典！
+                    </div>
                     <div class="progress-bg">
-                        <div class="progress-fill" :class="{full: gemResult.crystal.diff <= 0}" :style="{width: gearResult.amber.percent + '%'}"></div>
+                        <div class="progress-fill" :class="{full: gemResult.crystal.diff <= 0}" :style="{width: gemResult.crystal.percent + '%'}"></div>
                     </div>
                     <div class="progress-txt">
                         <span>進度：{{ gemResult.crystal.percent }}%</span>
@@ -4914,6 +4936,19 @@ createApp({
             try { localStorage.setItem('wos_auto_convert_amber', v ? 'true' : 'false') } catch(e){}
         })
 
+        // Sub-stages toggle & Auto-convert tome switch
+        const savedShowGemSubStages = localStorage.getItem('wos_show_gem_substages')
+        const showGemSubStages = ref(savedShowGemSubStages === 'true')
+        watch(showGemSubStages, (v) => {
+            try { localStorage.setItem('wos_show_gem_substages', v ? 'true' : 'false') } catch(e){}
+        })
+
+        const savedAutoConvertTome = localStorage.getItem('wos_auto_convert_tome')
+        const autoConvertTome = ref(savedAutoConvertTome === 'true')
+        watch(autoConvertTome, (v) => {
+            try { localStorage.setItem('wos_auto_convert_tome', v ? 'true' : 'false') } catch(e){}
+        })
+
         // Account & Cloud Sync State
         const playerId = ref(localStorage.getItem('wos_player_id') || '')
         const playerName = ref(localStorage.getItem('wos_player_name') || '')
@@ -4973,6 +5008,8 @@ createApp({
             if (d.gearInv) gearInv.value = d.gearInv
             if (d.gemInv) gemInv.value = d.gemInv
             if (typeof d.autoConvertAmber === 'boolean') autoConvertAmber.value = d.autoConvertAmber
+            if (typeof d.showGemSubStages === 'boolean') showGemSubStages.value = d.showGemSubStages
+            if (typeof d.autoConvertTome === 'boolean') autoConvertTome.value = d.autoConvertTome
         }
 
         const API_BASE = (window.location.hostname.includes('onrender.com') || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -5101,7 +5138,9 @@ createApp({
                 gearSlots: gearSlots.value,
                 gearInv: gearInv.value,
                 gemInv: gemInv.value,
-                autoConvertAmber: autoConvertAmber.value
+                autoConvertAmber: autoConvertAmber.value,
+                showGemSubStages: showGemSubStages.value,
+                autoConvertTome: autoConvertTome.value
             }
 
             const payload = {
@@ -5468,6 +5507,19 @@ createApp({
         }
 
         // Gem Computations
+        const displayedGemStages = computed(() => {
+            if (showGemSubStages.value) return gemStages.value
+            const curId = selectedCurrentGemId.value
+            const tarId = selectedTargetGemId.value
+            return gemStages.value.filter(s => {
+                return s.id === 0 || !s.sub_stage || s.sub_stage === '0' || s.id === curId || s.id === tarId
+            }).map(s => {
+                const isSub = s.sub_stage && s.sub_stage !== '0'
+                let cleanLabel = isSub ? s.label : s.label.replace(/\s*0階$/, '')
+                return { ...s, label: cleanLabel }
+            })
+        })
+
         const currentGemStage = computed(() => gemStages.value.find(s => s.id === selectedCurrentGemId.value) || null)
         const targetGemStage = computed(() => gemStages.value.find(s => s.id === selectedTargetGemId.value) || null)
         const activeGemSteps = computed(() => {
@@ -5483,16 +5535,32 @@ createApp({
                 totalBlueprint += (st.blueprint || 0) * mult
                 totalCrystal += (st.crystal || 0) * mult
             }
-            const calcItem = (needed, have) => {
+
+            let convertedFromGuide = 0
+            let convertedFromBp = 0
+            let convertedTomes = 0
+            if (autoConvertTome.value) {
+                const surplusGuide = Math.max(0, (Number(gemInv.value.guide) || 0) - totalGuide)
+                const surplusBp = Math.max(0, (Number(gemInv.value.blueprint) || 0) - totalBlueprint)
+                convertedFromGuide = Math.floor(surplusGuide / 40)
+                convertedFromBp = Math.floor(surplusBp / 40)
+                convertedTomes = convertedFromGuide + convertedFromBp
+            }
+
+            const calcItem = (needed, have, extra = 0) => {
                 const inv = Number(have) || 0
-                const diff = needed - inv
-                const percent = needed <= 0 ? 100 : Math.min(100, Math.round((inv / needed) * 100))
-                return { needed, have: inv, diff, percent }
+                const effectiveHave = inv + extra
+                const diff = needed - effectiveHave
+                const percent = needed <= 0 ? 100 : Math.min(100, Math.round((effectiveHave / needed) * 100))
+                return { needed, have: inv, effectiveHave, diff, percent }
             }
             return {
                 guide: calcItem(totalGuide, gemInv.value.guide),
                 blueprint: calcItem(totalBlueprint, gemInv.value.blueprint),
-                crystal: calcItem(totalCrystal, gemInv.value.crystal)
+                crystal: calcItem(totalCrystal, gemInv.value.crystal, convertedTomes),
+                convertedTomes,
+                convertedFromGuide,
+                convertedFromBp
             }
         })
 
@@ -5501,7 +5569,7 @@ createApp({
         }
         const setTargetGemLevel = (lvl) => {
             const prefix = `${lvl}寶`
-            const st = gemStages.value.find(s => s.label.startsWith(prefix))
+            const st = gemStages.value.find(s => s.label.startsWith(prefix) && (!s.sub_stage || s.sub_stage === '0'))
             if (st) selectedTargetGemId.value = st.id
         }
         const clearGemInv = () => {
@@ -5510,6 +5578,7 @@ createApp({
 
         return {
             ICONS, activeTab, gearMode, gearMultiplier, gemsMultiplier, showGearDetails, showGemDetails,
+            showGemSubStages, autoConvertTome, displayedGemStages,
             gearStages, gemStages, selectedCurrentGearId, selectedTargetGearId, selectedCurrentGemId, selectedTargetGemId,
             gearSlots, enabledSlotsCount, selectPresetSlots, gearInv, gemInv, formatNumber,
             currentGearStage, targetGearStage, activeGearSteps, gearResult, gearGainAttr, gearGainPower, gearGainCapacity,
