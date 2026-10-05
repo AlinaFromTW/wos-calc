@@ -1043,13 +1043,10 @@
                     <h3 style="font-size: 18px; font-weight: 900; color: #0f172a;">🎽 6 部件套裝勾選設定（已選 {{ enabledSlotsCount }} 件）</h3>
                     <p style="font-size: 13.5px; color: #64748b;">自由勾選要計算的部位，各部位可各自設定不同起點與目標。</p>
                 </div>
-                <div style="display: flex; gap: 8px; flex-wrap: wrap; width: 100%; align-items: center;">
-                    <span style="font-size: 13px; font-weight: 800; color: #475569;">⚡ 快速勾選：</span>
-                    <button type="button" class="btn-action" style="background:#0f172a;" @click="selectPresetSlots('all')">全選 6 件</button>
-                    <button type="button" class="btn-action" style="background:#64748b;" @click="selectPresetSlots('none')">全不選</button>
-                    <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetSlots('infantry')">🛡️ 盾兵 (外套+長褲)</button>
-                    <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetSlots('lancer')">⚔️ 矛兵 (帽子+手錶)</button>
-                    <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetSlots('marksman')">🏹 射手 (戒指+手杖)</button>
+                <div style="display: flex; gap: 6px; flex-wrap: wrap; width: 100%;">
+                    <button type="button" class="btn-action" style="background:#0f172a; flex: 1;" @click="selectPresetSlots('all')">全選 6 件</button>
+                    <button type="button" class="btn-action" style="background:#0284c7; flex: 1;" @click="selectPresetSlots('first3')">選前 3 件</button>
+                    <button type="button" class="btn-action" style="background:#0284c7; flex: 1;" @click="selectPresetSlots('last3')">選後 3 件</button>
                 </div>
             </div>
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px;">
@@ -1057,11 +1054,8 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
                             <input type="checkbox" v-model="slot.enabled" style="width: 20px; height: 20px; cursor: pointer;">
-                            <span style="font-size: 24px;">{{ slot.icon }}</span>
-                            <div>
-                                <span style="font-weight: 800; font-size: 16px; color: #0f172a;">{{ slot.name }}</span>
-                                <span style="font-size: 12px; color: #0284c7; font-weight: 700; margin-left: 6px;">{{ slot.troop }}</span>
-                            </div>
+                            <span style="font-size: 22px;">{{ slot.icon }}</span>
+                            <span style="font-weight: 800; font-size: 16px; color: #0f172a;">{{ slot.name }}</span>
                         </label>
                         <span v-if="slot.enabled" style="font-size: 12.5px; color: #0284c7; font-weight: 800; background: #e0f2fe; padding: 2px 8px; border-radius: 6px;">
                             需升 {{ Math.max(0, slot.targetId - slot.currentId) }} 階
@@ -1513,9 +1507,9 @@
                 <span style="font-size: 13px; font-weight: 800; color: #475569;">⚡ 快速勾選：</span>
                 <button type="button" class="btn-action" style="background:#0f172a;" @click="selectPresetGems('all')">全選 18 顆</button>
                 <button type="button" class="btn-action" style="background:#64748b;" @click="selectPresetGems('none')">全不選</button>
-                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('infantry')">🛡️ 盾兵 6 顆 (頭+胸)</button>
-                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('lancer')">⚔️ 槍兵 6 顆 (戒+武)</button>
-                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('marksman')">🏹 弓兵 6 顆 (褲+靴)</button>
+                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('infantry')">🛡️ 盾兵 6 顆 (衣服+褲子)</button>
+                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('lancer')">⚔️ 矛兵 6 顆 (冠冕+懷錶)</button>
+                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('marksman')">🏹 弓兵 6 顆 (戒指+手杖)</button>
                 <button type="button" class="btn-action" style="background:#059669; margin-left: auto;" @click="setAllGemTargetPlusOne">⚡ 所有勾選目標 +1 級</button>
             </div>
 
@@ -5115,30 +5109,30 @@ createApp({
         const selectedTargetGemId = ref(4)    // 4寶
 
         const gearSlots = ref([
-            { name: '外套 (衣服)', troop: '盾兵 (步兵)', icon: '🧥', currentId: 68, targetId: 78, enabled: true },
-            { name: '長褲 (褲子)', troop: '盾兵 (步兵)', icon: '👖', currentId: 68, targetId: 78, enabled: true },
-            { name: '帽子 (冠冕)', troop: '矛兵 (槍兵)', icon: '🎩', currentId: 68, targetId: 78, enabled: true },
-            { name: '手錶 (懷錶)', troop: '矛兵 (槍兵)', icon: '⌚', currentId: 68, targetId: 78, enabled: false },
-            { name: '戒指', troop: '射手 (弓兵)', icon: '💍', currentId: 68, targetId: 78, enabled: false },
-            { name: '手杖', troop: '射手 (弓兵)', icon: '🦯', currentId: 68, targetId: 78, enabled: false }
+            { name: '戰術頭盔', icon: '🪖', currentId: 68, targetId: 78, enabled: true },
+            { name: '防彈胸甲', icon: '🎽', currentId: 68, targetId: 78, enabled: true },
+            { name: '戰術戒指', icon: '💍', currentId: 68, targetId: 78, enabled: true },
+            { name: '突擊武器', icon: '⚔️', currentId: 68, targetId: 78, enabled: false },
+            { name: '戰術長褲', icon: '👖', currentId: 68, targetId: 78, enabled: false },
+            { name: '戰術皮靴', icon: '🥾', currentId: 68, targetId: 78, enabled: false }
         ])
 
         const enabledSlotsCount = computed(() => gearSlots.value.filter(s => s.enabled).length)
 
         const selectPresetSlots = (type) => {
-            gearSlots.value.forEach((s, idx) => {
-                if (type === 'all') s.enabled = true
-                else if (type === 'none') s.enabled = false
-                else if (type === 'infantry') s.enabled = (idx === 0 || idx === 1)
-                else if (type === 'lancer') s.enabled = (idx === 2 || idx === 3)
-                else if (type === 'marksman') s.enabled = (idx === 4 || idx === 5)
-            })
+            if (type === 'all') {
+                gearSlots.value.forEach(s => s.enabled = true)
+            } else if (type === 'first3') {
+                gearSlots.value.forEach((s, idx) => s.enabled = idx < 3)
+            } else if (type === 'last3') {
+                gearSlots.value.forEach((s, idx) => s.enabled = idx >= 3)
+            }
         }
 
         // 18 Gems Multi-Slot Mode State
         const defaultGemSlots = () => [
             {
-                name: '外套 (衣服)',
+                name: '衣服',
                 troop: '🛡️ 盾兵 (綠寶石)',
                 gemColor: '🟢 綠寶',
                 icon: '🧥',
@@ -5149,7 +5143,7 @@ createApp({
                 ]
             },
             {
-                name: '長褲 (褲子)',
+                name: '褲子',
                 troop: '🛡️ 盾兵 (綠寶石)',
                 gemColor: '🟢 綠寶',
                 icon: '👖',
@@ -5160,7 +5154,7 @@ createApp({
                 ]
             },
             {
-                name: '帽子 (冠冕)',
+                name: '冠冕 (帽子)',
                 troop: '⚔️ 矛兵 (藍寶石)',
                 gemColor: '🔵 藍寶',
                 icon: '🎩',
@@ -5171,7 +5165,7 @@ createApp({
                 ]
             },
             {
-                name: '手錶 (懷錶)',
+                name: '懷錶',
                 troop: '⚔️ 矛兵 (藍寶石)',
                 gemColor: '🔵 藍寶',
                 icon: '⌚',
