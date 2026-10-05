@@ -61,6 +61,38 @@
             margin-top: 6px;
             font-weight: 600;
         }
+        .app-version-badge {
+            font-size: 13px;
+            font-weight: 800;
+            color: #0284c7;
+            background: #e0f2fe;
+            border: 1px solid #bae6fd;
+            padding: 2px 10px;
+            border-radius: 12px;
+            vertical-align: middle;
+            display: inline-block;
+        }
+        .app-update-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 8px;
+            font-size: 13px;
+        }
+        .update-pill {
+            background: #f1f5f9;
+            color: #334155;
+            padding: 3px 12px;
+            border-radius: 14px;
+            border: 1px solid #cbd5e1;
+            font-weight: 700;
+        }
+        .update-tip {
+            color: #0284c7;
+            font-weight: 700;
+        }
 
         /* Two Main Big Switch Buttons */
         .main-tabs-grid {
@@ -878,12 +910,12 @@
                 </button>
             </div>
         </div>
-        <div class="acc-status-row" v-if="statusMsg">
-            <div :class="statusType === 'success' ? 'val-ok' : (statusType === 'error' ? 'val-lack' : 'acc-badge-warn')" style="font-weight: 800;">
+        <div class="acc-status-row" v-if="statusMsg || lastUpdated">
+            <div v-if="statusMsg" :class="statusType === 'success' ? 'val-ok' : (statusType === 'error' ? 'val-lack' : 'acc-badge-warn')" style="font-weight: 800;">
                 {{ statusMsg }}
             </div>
-            <div v-if="lastUpdated" style="color: #94a3b8; font-size: 12px;">
-                最後同步時間：{{ lastUpdated }}
+            <div v-if="lastUpdated" style="color: #64748b; font-size: 12px; font-weight: 700;">
+                ☁️ 雲端存檔最後同步：{{ lastUpdated }}
             </div>
         </div>
     </div>
@@ -891,8 +923,15 @@
     <!-- Top Header -->
     <div class="top-header">
         <div class="header-title-box">
-            <h1 class="brand-title">❄️ 寒霜刺客幫工具</h1>
+            <h1 class="brand-title">
+                ❄️ 寒霜刺客幫工具
+                <span class="app-version-badge">v2.5</span>
+            </h1>
             <p class="brand-subtitle">寒霜啟示錄 (Whiteout Survival) 領主裝備與寶石升級材料差額計算機</p>
+            <div class="app-update-info">
+                <span class="update-pill">📅 程式最後修改：<b>2026-10-05 16:20</b></span>
+                <span class="update-tip">✨ 支援 18 寶石、細階切換與每週秘典折算 (40:1)</span>
+            </div>
         </div>
 
         <!-- 2 Big Tab Switch Buttons -->
@@ -1700,6 +1739,14 @@
             </div>
         </div>
     </div>
+
+    <!-- Footer Info -->
+    <footer style="text-align: center; padding: 24px 10px 16px; color: #94a3b8; font-size: 13px; border-top: 1px solid #e2e8f0; margin-top: 28px;">
+        <p style="margin: 0 0 6px; font-weight: 800; color: #475569;">❄️ 寒霜刺客幫專屬工具 ❄️</p>
+        <p style="margin: 0; font-size: 12px; color: #64748b;">
+            程式版本：v2.5 ｜ 程式最後修改：2026-10-05 ｜ 專供聯盟成員使用
+        </p>
+    </footer>
 </div>
 
 <script>
