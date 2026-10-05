@@ -925,12 +925,12 @@
         <div class="header-title-box">
             <h1 class="brand-title">
                 ❄️ 寒霜刺客幫工具
-                <span class="app-version-badge">v2.5</span>
+                <span class="app-version-badge">v2.6</span>
             </h1>
             <p class="brand-subtitle">寒霜啟示錄 (Whiteout Survival) 領主裝備與寶石升級材料差額計算機</p>
             <div class="app-update-info">
-                <span class="update-pill">📅 程式最後修改：<b>2026-10-05 16:20</b></span>
-                <span class="update-tip">✨ 支援 18 寶石、細階切換與每週秘典折算 (40:1)</span>
+                <span class="update-pill">📅 程式最後修改：<b>2026-10-05 16:35</b></span>
+                <span class="update-tip">✨ 支援 18 顆寶石個別記錄、任意跨部位勾選合併升級試算</span>
             </div>
         </div>
 
@@ -1383,15 +1383,23 @@
 
     <!-- ================= 2. 領主寶石分頁 ================= -->
     <div v-show="activeTab === 'gems'">
-        <!-- Gems Multiplier Bar -->
+        <!-- Gems Mode & Multiplier Bar -->
         <div class="mode-bar">
-            <div class="mult-wrapper">
-                <span class="mult-lbl">🎯 寶石計算顆數：</span>
+            <div class="mode-btn-group">
+                <button type="button" class="mode-pill" :class="{active: gemMode === 'quick'}" @click="gemMode = 'quick'">
+                    ⚡ 快速試算 (同步顆數)
+                </button>
+                <button type="button" class="mode-pill" :class="{active: gemMode === 'multi'}" @click="gemMode = 'multi'">
+                    💎 6 件裝備 18 顆寶石個別設定
+                </button>
+            </div>
+            <div v-if="gemMode === 'quick'" class="mult-wrapper">
+                <span class="mult-lbl">🎯 同步計算顆數：</span>
                 <div class="mult-btns">
                     <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 1}" @click="gemsMultiplier = 1">1 顆 (單顆)</button>
                     <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 3}" @click="gemsMultiplier = 3">3 顆 (單部位)</button>
                     <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 6}" @click="gemsMultiplier = 6">6 顆 (單兵種)</button>
-                    <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 18}" @click="gemsMultiplier = 18">18 顆 (全身6件滿套)</button>
+                    <button type="button" class="mult-btn" :class="{active: gemsMultiplier === 18}" @click="gemsMultiplier = 18">18 顆 (全身滿套)</button>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px; margin-left: 8px;">
                     <span style="font-size: 13px; color: #64748b; font-weight: bold;">自訂:</span>
@@ -1401,8 +1409,8 @@
             </div>
         </div>
 
-        <!-- Gems Selectors -->
-        <div class="card">
+        <!-- 1. Quick Mode Selectors -->
+        <div class="card" v-if="gemMode === 'quick'">
             <!-- Substage Toggle Switch -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed #e2e8f0;">
                 <div style="font-size: 13px; color: #64748b;">
@@ -1473,13 +1481,113 @@
             </div>
         </div>
 
+        <!-- 2. 18 Gems Multi-Slot Mode -->
+        <div class="card" v-if="gemMode === 'multi'">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <h3 style="font-size: 18px; font-weight: 900; color: #0f172a; margin: 0 0 4px;">
+                        💎 6 件裝備 18 顆寶石個別設定
+                        <span style="font-size: 13.5px; color: #0284c7; background: #e0f2fe; padding: 2px 10px; border-radius: 12px; margin-left: 6px; font-weight: 800;">
+                            已勾選 {{ enabledGemsCount }} / 18 顆升級
+                        </span>
+                    </h3>
+                    <p style="font-size: 13.5px; color: #64748b; margin: 0;">
+                        個別記錄每件裝備 3 顆寶石當前等級。勾選要升級的寶石並選定目標，下方將自動合併統計總材料需求！
+                    </p>
+                </div>
+                <!-- Substage Toggle Switch -->
+                <label style="display: inline-flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; color: #0369a1; font-weight: 700; background: #f0f9ff; padding: 4px 12px; border-radius: 20px; border: 1px solid #bae6fd;">
+                    <input type="checkbox" v-model="showGemSubStages" style="cursor: pointer; width: 15px; height: 15px;">
+                    🔍 顯示細項子階進度條 (0~3階微調)
+                </label>
+            </div>
+
+            <!-- Quick Preset Action Row -->
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; background: #f8fafc; padding: 10px 12px; border-radius: 10px; border: 1px solid #e2e8f0; align-items: center;">
+                <span style="font-size: 13px; font-weight: 800; color: #475569;">⚡ 快速勾選：</span>
+                <button type="button" class="btn-action" style="background:#0f172a;" @click="selectPresetGems('all')">全選 18 顆</button>
+                <button type="button" class="btn-action" style="background:#64748b;" @click="selectPresetGems('none')">全不選</button>
+                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('infantry')">🛡️ 盾兵 6 顆 (頭+胸)</button>
+                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('lancer')">⚔️ 槍兵 6 顆 (戒+武)</button>
+                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('marksman')">🏹 弓兵 6 顆 (褲+靴)</button>
+                <button type="button" class="btn-action" style="background:#059669; margin-left: auto;" @click="setAllGemTargetPlusOne">⚡ 所有勾選目標 +1 級</button>
+            </div>
+
+            <!-- 6 Gear Cards Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px;">
+                <div v-for="slot in gemSlots" :key="slot.name" class="slot-card" :class="slot.gems.some(g => g.enabled) ? 'is-active' : 'is-disabled'">
+                    <!-- Card Header -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 24px;">{{ slot.icon }}</span>
+                            <div>
+                                <div style="font-weight: 800; font-size: 16px; color: #0f172a;">{{ slot.name }}</div>
+                                <div style="font-size: 12px; color: #0284c7; font-weight: 700;">{{ slot.troop }}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 4px; align-items: center;">
+                            <button type="button" style="padding: 3px 8px; font-size: 11.5px; font-weight: 700; border-radius: 6px; border: 1px solid #cbd5e1; background: #fff; cursor: pointer;"
+                                    @click="toggleSlotGems(slot)">
+                                {{ slot.gems.every(g => g.enabled) ? '全不選' : '全選' }}
+                            </button>
+                            <button type="button" style="padding: 3px 8px; font-size: 11.5px; font-weight: 700; border-radius: 6px; border: 1px solid #bae6fd; background: #f0f9ff; color: #0284c7; cursor: pointer;"
+                                    title="將寶石1的當前與目標等級同步至寶石2與3"
+                                    @click="syncSlotGems(slot)">
+                                🔄 同步
+                            </button>
+                            <button type="button" style="padding: 3px 8px; font-size: 11.5px; font-weight: 700; border-radius: 6px; border: 1px solid #a7f3d0; background: #ecfdf5; color: #059669; cursor: pointer;"
+                                    title="這件裝備的 3 顆寶石目標皆 +1 級"
+                                    @click="setSlotGemTargetPlusOne(slot)">
+                                +1 級
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3 Gems Rows -->
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <div v-for="(gem, gIdx) in slot.gems" :key="gem.id"
+                             style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; transition: all 0.2s;"
+                             :style="gem.enabled ? 'border-color: #38bdf8; background: #ffffff;' : 'opacity: 0.65;'">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
+                                    <input type="checkbox" v-model="gem.enabled" style="width: 18px; height: 18px; cursor: pointer;">
+                                    <span style="font-weight: 800; font-size: 14px; color: #0f172a;">💎 寶石 #{{ gIdx + 1 }}</span>
+                                </label>
+                                <span v-if="gem.enabled" style="font-size: 12px; font-weight: 800; padding: 2px 8px; border-radius: 6px;"
+                                      :style="gem.targetId > gem.currentId ? 'background: #e0f2fe; color: #0284c7;' : 'background: #f1f5f9; color: #64748b;'">
+                                    {{ gem.targetId > gem.currentId ? '需升 ' + (gem.targetId - gem.currentId) + ' 階' : '已達標 / 無需升級' }}
+                                </span>
+                                <span v-else style="font-size: 12px; color: #94a3b8; font-weight: 600;">（不升級）</span>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <div>
+                                    <span style="font-size: 11.5px; font-weight: 700; color: #64748b; display: block; margin-bottom: 3px;">當前：</span>
+                                    <select v-model.number="gem.currentId" style="width: 100%; padding: 6px 8px; border-radius: 6px; border: 1.5px solid #cbd5e1; font-weight: 700; font-size: 13.5px; background: #fff;">
+                                        <option v-for="st in displayedGemStages" :key="st.id" :value="st.id">{{ st.label }}</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <span style="font-size: 11.5px; font-weight: 700; color: #0284c7; display: block; margin-bottom: 3px;">目標：</span>
+                                    <select v-model.number="gem.targetId" style="width: 100%; padding: 6px 8px; border-radius: 6px; border: 1.5px solid #38bdf8; font-weight: 700; font-size: 13.5px; background: #fff;">
+                                        <option v-for="st in displayedGemStages" :key="st.id" :value="st.id">{{ st.label }}</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Gem Material Shortage Cards -->
         <div class="card">
             <div class="section-header-row">
                 <div>
                     <h3 class="section-title">
                         📦 寶石材料總計 vs 背包庫存差額
-                        <span style="font-size: 15px; color: #0284c7; font-weight: 800;">({{ gemsMultiplier }} 顆)</span>
+                        <span style="font-size: 15px; color: #0284c7; font-weight: 800;">
+                            ({{ gemMode === 'quick' ? gemsMultiplier + ' 顆同步' : enabledGemsCount + ' 顆已勾選升級' }})
+                        </span>
                     </h3>
                     <p class="section-desc">輸入寶石手冊、圖紙與秘典庫存即時試算。</p>
                 </div>
@@ -1624,15 +1732,24 @@
         <div class="card">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
                 <div>
-                    <h3 class="section-title">💎 寶石逐階升級明細</h3>
-                    <p class="section-desc">查看每一步寶石升級所需的手冊、圖紙與秘典消耗。</p>
+                    <h3 class="section-title">
+                        💎 寶石升級明細清單
+                        <span v-if="gemMode === 'multi' && activeMultiGemSteps.length > 0" style="font-size: 14px; color: #0284c7; font-weight: 800; background: #e0f2fe; padding: 2px 8px; border-radius: 6px; margin-left: 6px;">
+                            共 {{ activeMultiGemSteps.length }} 顆寶石待升級
+                        </span>
+                    </h3>
+                    <p class="section-desc">
+                        {{ gemMode === 'quick' ? '查看每一步寶石升級所需的手冊、圖紙與秘典消耗。' : '查看所有已勾選裝備寶石之升級明細與各自所需材料。' }}
+                    </p>
                 </div>
                 <button type="button" class="btn-action" @click="showGemDetails = !showGemDetails">
-                    {{ showGemDetails ? '隱藏逐階明細 🔼' : '展開逐階明細 🔽' }}
+                    {{ showGemDetails ? '隱藏升級明細 🔼' : '展開升級明細 🔽' }}
                 </button>
             </div>
+
             <div class="table-responsive" v-show="showGemDetails">
-                <table>
+                <!-- 1. Quick Mode Table -->
+                <table v-if="gemMode === 'quick'">
                     <thead>
                         <tr>
                             <th style="width: 60px;">步驟</th>
@@ -1657,6 +1774,43 @@
                         <tr v-if="activeGemSteps.length === 0">
                             <td colspan="7" style="text-align: center; color: #94a3b8; padding: 25px;">
                                 目標階級需大於當前階級才能查看詳細升級步驟。
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <!-- 2. Multi Mode Table -->
+                <table v-if="gemMode === 'multi'">
+                    <thead>
+                        <tr>
+                            <th>裝備部位</th>
+                            <th>寶石槽位</th>
+                            <th>升級路徑 (當前 ➔ 目標)</th>
+                            <th>升級階數</th>
+                            <th><img :src="ICONS.gem_guide" class="mat-img-sm">寶石手冊</th>
+                            <th><img :src="ICONS.gem_blueprint" class="mat-img-sm">寶石圖紙</th>
+                            <th><img :src="ICONS.gem_crystal" class="mat-img-sm">寶石秘典</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(item, idx) in activeMultiGemSteps" :key="idx">
+                            <td style="font-weight: 800;">
+                                <span style="font-size: 16px; margin-right: 4px;">{{ item.icon }}</span>
+                                {{ item.gearName }}
+                                <span style="font-size: 11.5px; color: #0284c7; background: #e0f2fe; padding: 1px 6px; border-radius: 4px; margin-left: 4px;">{{ item.troop }}</span>
+                            </td>
+                            <td style="font-weight: 700; color: #475569;">{{ item.gemIndex ? '寶石 #' + item.gemIndex : '' }}</td>
+                            <td style="font-weight: 800; color: #0f172a;">
+                                {{ item.fromLabel }} <span style="color: #0284c7;">➔</span> {{ item.toLabel }}
+                            </td>
+                            <td><span style="font-weight: 700; color: #0284c7;">{{ item.stepsCount }} 階</span></td>
+                            <td style="font-weight: 700;">{{ formatNumber(item.guide) }}</td>
+                            <td style="font-weight: 700;">{{ formatNumber(item.blueprint) }}</td>
+                            <td style="font-weight: 700;">{{ formatNumber(item.crystal) }}</td>
+                        </tr>
+                        <tr v-if="activeMultiGemSteps.length === 0">
+                            <td colspan="7" style="text-align: center; color: #94a3b8; padding: 25px;">
+                                目前尚未勾選任何需要升級的寶石（目標階級需大於當前階級且勾選）。
                             </td>
                         </tr>
                     </tbody>
@@ -1744,7 +1898,7 @@
     <footer style="text-align: center; padding: 24px 10px 16px; color: #94a3b8; font-size: 13px; border-top: 1px solid #e2e8f0; margin-top: 28px;">
         <p style="margin: 0 0 6px; font-weight: 800; color: #475569;">❄️ 寒霜刺客幫專屬工具 ❄️</p>
         <p style="margin: 0; font-size: 12px; color: #64748b;">
-            程式版本：v2.5 ｜ 程式最後修改：2026-10-05 ｜ 專供聯盟成員使用
+            程式版本：v2.6 ｜ 程式最後修改：2026-10-05 ｜ 專供聯盟成員使用
         </p>
     </footer>
 </div>
@@ -4975,6 +5129,160 @@ createApp({
             }
         }
 
+        // 18 Gems Multi-Slot Mode State
+        const defaultGemSlots = () => [
+            {
+                name: '戰術頭盔',
+                troop: '盾兵 (步防)',
+                icon: '🪖',
+                gems: [
+                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: true },
+                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: true },
+                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: true }
+                ]
+            },
+            {
+                name: '防彈胸甲',
+                troop: '盾兵 (步生)',
+                icon: '🎽',
+                gems: [
+                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: true },
+                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: true },
+                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: true }
+                ]
+            },
+            {
+                name: '戰術戒指',
+                troop: '槍兵 (矛攻)',
+                icon: '💍',
+                gems: [
+                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
+                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: false },
+                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: false }
+                ]
+            },
+            {
+                name: '突擊武器',
+                troop: '槍兵 (矛殺)',
+                icon: '⚔️',
+                gems: [
+                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
+                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: false },
+                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: false }
+                ]
+            },
+            {
+                name: '戰術長褲',
+                troop: '弓兵 (射生)',
+                icon: '👖',
+                gems: [
+                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
+                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: false },
+                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: false }
+                ]
+            },
+            {
+                name: '戰術皮靴',
+                troop: '弓兵 (射殺)',
+                icon: '🥾',
+                gems: [
+                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: false },
+                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: false },
+                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: false }
+                ]
+            }
+        ]
+
+        const savedGemMode = localStorage.getItem('wos_gem_mode')
+        const gemMode = ref(savedGemMode || 'quick')
+        watch(gemMode, (v) => {
+            try { localStorage.setItem('wos_gem_mode', v) } catch(e){}
+        })
+
+        const savedGemSlots = localStorage.getItem('wos_gem_slots')
+        const gemSlots = ref(savedGemSlots ? JSON.parse(savedGemSlots) : defaultGemSlots())
+        watch(gemSlots, (v) => {
+            try { localStorage.setItem('wos_gem_slots', JSON.stringify(v)) } catch(e){}
+        }, { deep: true })
+
+        const enabledGemsCount = computed(() => {
+            let count = 0
+            if (gemSlots.value) {
+                for (const slot of gemSlots.value) {
+                    if (slot.gems) {
+                        for (const g of slot.gems) {
+                            if (g.enabled) count++
+                        }
+                    }
+                }
+            }
+            return count
+        })
+
+        const selectPresetGems = (type) => {
+            if (!gemSlots.value) return
+            gemSlots.value.forEach((slot, sIdx) => {
+                let enableSlot = false
+                if (type === 'all') enableSlot = true
+                else if (type === 'none') enableSlot = false
+                else if (type === 'infantry') enableSlot = (sIdx === 0 || sIdx === 1)
+                else if (type === 'lancer') enableSlot = (sIdx === 2 || sIdx === 3)
+                else if (type === 'marksman') enableSlot = (sIdx === 4 || sIdx === 5)
+                if (slot.gems) slot.gems.forEach(g => g.enabled = enableSlot)
+            })
+        }
+
+        const toggleSlotGems = (slot, state) => {
+            if (!slot || !slot.gems) return
+            const targetState = state !== undefined ? state : !slot.gems.every(g => g.enabled)
+            slot.gems.forEach(g => g.enabled = targetState)
+        }
+
+        const syncSlotGems = (slot) => {
+            if (!slot || !slot.gems || slot.gems.length === 0) return
+            const baseCurrent = slot.gems[0].currentId
+            const baseTarget = slot.gems[0].targetId
+            slot.gems.forEach((g, idx) => {
+                if (idx > 0) {
+                    g.currentId = baseCurrent
+                    g.targetId = baseTarget
+                }
+            })
+        }
+
+        const advanceGemStage = (curId) => {
+            if (showGemSubStages.value) {
+                return Math.min(gemStages.value.length - 1, curId + 1)
+            }
+            const curStage = gemStages.value.find(s => s.id === curId)
+            if (!curStage) return Math.min(gemStages.value.length - 1, curId + 4)
+            const curLvl = parseInt(curStage.level) || 0
+            const targetLvl = curLvl + 1
+            const nextStage = gemStages.value.find(s => (parseInt(s.level) === targetLvl) && (!s.sub_stage || s.sub_stage === '0'))
+            return nextStage ? nextStage.id : Math.min(gemStages.value.length - 1, curId + 4)
+        }
+
+        const setSlotGemTargetPlusOne = (slot) => {
+            if (!slot || !slot.gems) return
+            slot.gems.forEach(g => {
+                g.targetId = advanceGemStage(g.currentId)
+                g.enabled = true
+            })
+        }
+
+        const setAllGemTargetPlusOne = () => {
+            if (!gemSlots.value) return
+            gemSlots.value.forEach(slot => {
+                if (slot.gems) {
+                    slot.gems.forEach(g => {
+                        if (g.enabled) {
+                            g.targetId = advanceGemStage(g.currentId)
+                        }
+                    })
+                }
+            })
+        }
+
         // Auto-convert amber to blueprint switch
         const savedAutoConvert = localStorage.getItem('wos_auto_convert_amber')
         const autoConvertAmber = ref(savedAutoConvert === 'true')
@@ -5057,6 +5365,8 @@ createApp({
             if (typeof d.autoConvertAmber === 'boolean') autoConvertAmber.value = d.autoConvertAmber
             if (typeof d.showGemSubStages === 'boolean') showGemSubStages.value = d.showGemSubStages
             if (typeof d.autoConvertTome === 'boolean') autoConvertTome.value = d.autoConvertTome
+            if (d.gemMode) gemMode.value = d.gemMode
+            if (d.gemSlots) gemSlots.value = d.gemSlots
         }
 
         const API_BASE = (window.location.hostname.includes('onrender.com') || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
@@ -5187,7 +5497,9 @@ createApp({
                 gemInv: gemInv.value,
                 autoConvertAmber: autoConvertAmber.value,
                 showGemSubStages: showGemSubStages.value,
-                autoConvertTome: autoConvertTome.value
+                autoConvertTome: autoConvertTome.value,
+                gemMode: gemMode.value,
+                gemSlots: gemSlots.value
             }
 
             const payload = {
@@ -5556,10 +5868,21 @@ createApp({
         // Gem Computations
         const displayedGemStages = computed(() => {
             if (showGemSubStages.value) return gemStages.value
-            const curId = selectedCurrentGemId.value
-            const tarId = selectedTargetGemId.value
+            const selectedIds = new Set()
+            selectedIds.add(selectedCurrentGemId.value)
+            selectedIds.add(selectedTargetGemId.value)
+            if (gemSlots.value) {
+                for (const slot of gemSlots.value) {
+                    if (slot.gems) {
+                        for (const g of slot.gems) {
+                            selectedIds.add(g.currentId)
+                            selectedIds.add(g.targetId)
+                        }
+                    }
+                }
+            }
             return gemStages.value.filter(s => {
-                return s.id === 0 || !s.sub_stage || s.sub_stage === '0' || s.id === curId || s.id === tarId
+                return s.id === 0 || !s.sub_stage || s.sub_stage === '0' || selectedIds.has(s.id)
             }).map(s => {
                 const isSub = s.sub_stage && s.sub_stage !== '0'
                 let cleanLabel = isSub ? s.label : s.label.replace(/\s*0階$/, '')
@@ -5574,13 +5897,67 @@ createApp({
             return tar > cur ? gemStages.value.filter(s => s.id > cur && s.id <= tar) : []
         })
 
+        const activeMultiGemSteps = computed(() => {
+            const list = []
+            if (gemMode.value !== 'multi' || !gemSlots.value) return list
+            for (const slot of gemSlots.value) {
+                if (!slot.gems) continue
+                for (let i = 0; i < slot.gems.length; i++) {
+                    const g = slot.gems[i]
+                    if (g.enabled && g.targetId > g.currentId) {
+                        const curStage = gemStages.value.find(s => s.id === g.currentId)
+                        const tarStage = gemStages.value.find(s => s.id === g.targetId)
+                        const steps = gemStages.value.filter(s => s.id > g.currentId && s.id <= g.targetId)
+                        let guide = 0, blueprint = 0, crystal = 0
+                        for (const st of steps) {
+                            guide += (st.guide || 0)
+                            blueprint += (st.blueprint || 0)
+                            crystal += (st.crystal || 0)
+                        }
+                        list.push({
+                            gearName: slot.name,
+                            icon: slot.icon,
+                            troop: slot.troop,
+                            gemIndex: i + 1,
+                            fromLabel: curStage ? curStage.label : `${g.currentId}`,
+                            toLabel: tarStage ? tarStage.label : `${g.targetId}`,
+                            stepsCount: steps.length,
+                            guide,
+                            blueprint,
+                            crystal
+                        })
+                    }
+                }
+            }
+            return list
+        })
+
         const gemResult = computed(() => {
             let totalGuide = 0, totalBlueprint = 0, totalCrystal = 0
-            const mult = gemsMultiplier.value || 1
-            for (const st of activeGemSteps.value) {
-                totalGuide += (st.guide || 0) * mult
-                totalBlueprint += (st.blueprint || 0) * mult
-                totalCrystal += (st.crystal || 0) * mult
+
+            if (gemMode.value === 'quick') {
+                const mult = gemsMultiplier.value || 1
+                for (const st of activeGemSteps.value) {
+                    totalGuide += (st.guide || 0) * mult
+                    totalBlueprint += (st.blueprint || 0) * mult
+                    totalCrystal += (st.crystal || 0) * mult
+                }
+            } else {
+                if (gemSlots.value) {
+                    for (const slot of gemSlots.value) {
+                        if (!slot.gems) continue
+                        for (const gem of slot.gems) {
+                            if (gem.enabled && gem.targetId > gem.currentId) {
+                                const steps = gemStages.value.filter(s => s.id > gem.currentId && s.id <= gem.targetId)
+                                for (const st of steps) {
+                                    totalGuide += (st.guide || 0)
+                                    totalBlueprint += (st.blueprint || 0)
+                                    totalCrystal += (st.crystal || 0)
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             let convertedFromGuide = 0
@@ -5624,13 +6001,14 @@ createApp({
         }
 
         return {
-            ICONS, activeTab, gearMode, gearMultiplier, gemsMultiplier, showGearDetails, showGemDetails,
-            showGemSubStages, autoConvertTome, displayedGemStages,
+            ICONS, activeTab, gearMode, gearMultiplier, gemsMultiplier, gemMode, gemSlots, enabledGemsCount,
+            selectPresetGems, toggleSlotGems, syncSlotGems, setSlotGemTargetPlusOne, setAllGemTargetPlusOne,
+            showGearDetails, showGemDetails, showGemSubStages, autoConvertTome, displayedGemStages,
             gearStages, gemStages, selectedCurrentGearId, selectedTargetGearId, selectedCurrentGemId, selectedTargetGemId,
             gearSlots, enabledSlotsCount, selectPresetSlots, gearInv, gemInv, formatNumber,
             currentGearStage, targetGearStage, activeGearSteps, gearResult, gearGainAttr, gearGainPower, gearGainCapacity,
             setTargetGearOffset, setTargetGearQuality, syncAllGearSlots, clearGearInv,
-            currentGemStage, targetGemStage, activeGemSteps, gemResult, setTargetGemOffset, setTargetGemLevel, clearGemInv,
+            currentGemStage, targetGemStage, activeGemSteps, activeMultiGemSteps, gemResult, setTargetGemOffset, setTargetGemLevel, clearGemInv,
             autoConvertAmber, playerId, playerName, isWhitelisted, lastUpdated, statusMsg, statusType, isLoading, isSaving,
             loadUserSave, saveUserSave,
             showAdminModal, isAdminLoggedIn, adminPassInput, adminLoginErr, whitelistList, newWlId, newWlName, newWlNote,
