@@ -5111,8 +5111,17 @@ const { createApp, ref, computed, onMounted, watch } = Vue
 
 createApp({
     setup() {
-        const activeTab = ref('gear') // 'gear' | 'gems'
-        const gearMode = ref('quick')  // 'quick' | 'multi'
+        const savedActiveTab = localStorage.getItem('wos_active_tab')
+        const activeTab = ref(savedActiveTab || 'gear') // 'gear' | 'gems'
+        watch(activeTab, (v) => {
+            try { localStorage.setItem('wos_active_tab', v) } catch(e){}
+        })
+
+        const savedGearMode = localStorage.getItem('wos_gear_mode')
+        const gearMode = ref(savedGearMode || 'multi')  // 'quick' | 'multi'，預設保持六件套裝勾選
+        watch(gearMode, (v) => {
+            try { localStorage.setItem('wos_gear_mode', v) } catch(e){}
+        })
         const gearMultiplier = ref(3)  // Default to 3 pieces!
         const gemsMultiplier = ref(3)  // Default to 3 gems!
         const showGearDetails = ref(false)
@@ -5310,7 +5319,7 @@ createApp({
         }
 
         const savedGemMode = localStorage.getItem('wos_gem_mode')
-        const gemMode = ref(savedGemMode || 'quick')
+        const gemMode = ref(savedGemMode || 'multi')
         watch(gemMode, (v) => {
             try { localStorage.setItem('wos_gem_mode', v) } catch(e){}
         })
@@ -5473,7 +5482,6 @@ createApp({
 
         const applyUserData = (d) => {
             if (!d) return
-            if (d.activeTab) activeTab.value = d.activeTab
             if (d.gearMode) gearMode.value = d.gearMode
             if (d.gearMultiplier) gearMultiplier.value = d.gearMultiplier
             if (d.gemsMultiplier) gemsMultiplier.value = d.gemsMultiplier
