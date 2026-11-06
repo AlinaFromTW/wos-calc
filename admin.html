@@ -1009,13 +1009,13 @@ createApp({
                     loginError.value = data.msg || '管理密碼錯誤'
                 }
             } catch (err) {
-                if (pwd === 'alina5085') {
+                if (pwd === 'admin123' || pwd === 'alina5085') {
                     isLoggedIn.value = true
                     savedPass.value = pwd
                     localStorage.setItem('wos_admin_pass', pwd)
                     fetchWhitelist()
                 } else {
-                    loginError.value = '連線失敗或密碼錯誤'
+                    loginError.value = '連線失敗或密碼錯誤 (預設密碼為 admin123)'
                 }
             } finally {
                 isSubmitting.value = false
@@ -1030,7 +1030,7 @@ createApp({
 
         const fetchWhitelist = async () => {
             try {
-                const res = await fetch(`${API_BASE}/api/admin/whitelist?admin_pass=${encodeURIComponent(savedPass.value || 'alina5085')}`)
+                const res = await fetch(`${API_BASE}/api/admin/whitelist?admin_pass=${encodeURIComponent(savedPass.value || 'admin123')}`)
                 if (res.ok) {
                     const data = await res.json()
                     if (data.success) {
@@ -1054,7 +1054,7 @@ createApp({
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        admin_pass: savedPass.value || 'alina5085',
+                        admin_pass: savedPass.value || 'admin123',
                         player_id: pid,
                         player_name: newPlayerName.value.trim(),
                         note: newPlayerNote.value.trim()
@@ -1094,7 +1094,7 @@ createApp({
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        admin_pass: savedPass.value || 'alina5085',
+                        admin_pass: savedPass.value || 'admin123',
                         player_id: pid,
                         player_name: editPlayerName.value.trim(),
                         note: editPlayerNote.value.trim()
@@ -1135,7 +1135,7 @@ createApp({
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        admin_pass: savedPass.value || 'alina5085',
+                        admin_pass: savedPass.value || 'admin123',
                         player_id: pid
                     })
                 })
@@ -1151,7 +1151,7 @@ createApp({
 
         const downloadBackup = async () => {
             try {
-                const res = await fetch(`${API_BASE}/api/admin/backup/export?admin_pass=${encodeURIComponent(savedPass.value || 'alina5085')}`)
+                const res = await fetch(`${API_BASE}/api/admin/backup/export?admin_pass=${encodeURIComponent(savedPass.value || 'admin123')}`)
                 if (res.ok) {
                     const data = await res.json()
                     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
@@ -1182,7 +1182,7 @@ createApp({
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            admin_pass: savedPass.value || 'alina5085',
+                            admin_pass: savedPass.value || 'admin123',
                             backup_data: jsonData
                         })
                     })

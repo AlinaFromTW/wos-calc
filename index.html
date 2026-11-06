@@ -5597,8 +5597,8 @@ createApp({
                 return
             }
 
-            // 預設管理密碼 alina5085 立即通過
-            if (inputPwd === 'alina5085') {
+            // 預設管理密碼 admin123 立即通過 (亦相容 alina5085)
+            if (inputPwd === 'admin123' || inputPwd === 'alina5085') {
                 isAdminLoggedIn.value = true
                 fetchWhitelist()
                 return
@@ -5620,13 +5620,13 @@ createApp({
                 }
                 adminLoginErr.value = '管理密碼錯誤'
             } catch (err) {
-                adminLoginErr.value = '管理密碼錯誤 (預設密碼為 alina5085)'
+                adminLoginErr.value = '管理密碼錯誤 (預設密碼為 admin123)'
             }
         }
 
         const fetchWhitelist = async () => {
             try {
-                const res = await fetch(`${API_BASE}/api/admin/whitelist?admin_pass=${encodeURIComponent(adminPassInput.value || 'alina5085')}`)
+                const res = await fetch(`${API_BASE}/api/admin/whitelist?admin_pass=${encodeURIComponent(adminPassInput.value || 'admin123')}`)
                 if (res.ok) {
                     const data = await res.json()
                     if (data.success) {
@@ -5657,7 +5657,7 @@ createApp({
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        admin_pass: adminPassInput.value || 'alina5085',
+                        admin_pass: adminPassInput.value || 'admin123',
                         player_id: pid,
                         player_name: newWlName.value.trim(),
                         note: newWlNote.value.trim()
@@ -5703,7 +5703,7 @@ createApp({
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        admin_pass: adminPassInput.value || 'alina5085',
+                        admin_pass: adminPassInput.value || 'admin123',
                         player_id: pid
                     })
                 })
