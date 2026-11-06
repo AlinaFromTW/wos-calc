@@ -576,6 +576,13 @@
         .gain-title { font-size: 13.5px; color: #64748b; font-weight: 700; }
         .gain-val { font-size: 22px; font-weight: 900; color: #0284c7; margin-top: 1px; }
 
+        /* Gem slots grid: 2 cards per row */
+        .gem-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
         /* Slot card */
         .slot-card {
             background: #f8fafc;
@@ -863,6 +870,10 @@
             .gain-grid {
                 grid-template-columns: 1fr;
                 gap: 10px;
+            }
+            .gem-slots-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
             }
         }
     </style>
@@ -1507,14 +1518,14 @@
                 <span style="font-size: 13px; font-weight: 800; color: #475569;">⚡ 快速勾選：</span>
                 <button type="button" class="btn-action" style="background:#0f172a;" @click="selectPresetGems('all')">全選 18 顆</button>
                 <button type="button" class="btn-action" style="background:#64748b;" @click="selectPresetGems('none')">全不選</button>
-                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('infantry')">🛡️ 盾兵 6 顆 (衣服+褲子)</button>
-                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('lancer')">⚔️ 矛兵 6 顆 (冠冕+懷錶)</button>
-                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('marksman')">🏹 弓兵 6 顆 (戒指+手杖)</button>
+                <button type="button" class="btn-action" style="background:#0284c7;" @click="selectPresetGems('lancer')">⚔️ 矛兵 6 顆 (帽子+懷錶)</button>
+                <button type="button" class="btn-action" style="background:#059669;" @click="selectPresetGems('infantry')">🛡️ 盾兵 6 顆 (外套+褲子)</button>
+                <button type="button" class="btn-action" style="background:#d97706;" @click="selectPresetGems('marksman')">🏹 弓兵 6 顆 (戒指+手杖)</button>
                 <button type="button" class="btn-action" style="background:#059669; margin-left: auto;" @click="setAllGemTargetPlusOne">⚡ 所有勾選目標 +1 級</button>
             </div>
 
-            <!-- 6 Gear Cards Grid -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px;">
+            <!-- 6 Gear Cards Grid: 2 per row (上: 矛, 中: 盾, 下: 弓) -->
+            <div class="gem-slots-grid">
                 <div v-for="slot in gemSlots" :key="slot.name" class="slot-card" :class="slot.gems.some(g => g.enabled) ? 'is-active' : 'is-disabled'">
                     <!-- Card Header -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px;">
@@ -1522,7 +1533,7 @@
                             <span style="font-size: 24px;">{{ slot.icon }}</span>
                             <div>
                                 <div style="font-weight: 800; font-size: 16px; color: #0f172a;">{{ slot.name }}</div>
-                                <div style="font-size: 12px; color: #0284c7; font-weight: 700;">{{ slot.troop }}</div>
+                                <div style="font-size: 12px; font-weight: 700;" :style="{ color: slot.badgeColor || '#0284c7' }">{{ slot.troop }}</div>
                             </div>
                         </div>
                         <div style="display: flex; gap: 4px; align-items: center;">
@@ -5129,33 +5140,13 @@ createApp({
             }
         }
 
-        // 18 Gems Multi-Slot Mode State
+        // 18 Gems Multi-Slot Mode State (順序: 上:矛帽子/懷錶, 中:盾外套/褲子, 下:弓戒指/手杖)
         const defaultGemSlots = () => [
             {
-                name: '衣服',
-                troop: '🛡️ 盾兵 (綠寶石)',
-                gemColor: '🟢 綠寶',
-                icon: '🧥',
-                gems: [
-                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: true },
-                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: true },
-                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: true }
-                ]
-            },
-            {
-                name: '褲子',
-                troop: '🛡️ 盾兵 (綠寶石)',
-                gemColor: '🟢 綠寶',
-                icon: '👖',
-                gems: [
-                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: true },
-                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: true },
-                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: true }
-                ]
-            },
-            {
-                name: '冠冕 (帽子)',
+                key: 'hat',
+                name: '帽子 (冠冕)',
                 troop: '⚔️ 矛兵 (藍寶石)',
+                badgeColor: '#0284c7',
                 gemColor: '🔵 藍寶',
                 icon: '🎩',
                 gems: [
@@ -5165,8 +5156,10 @@ createApp({
                 ]
             },
             {
-                name: '懷錶',
+                key: 'watch',
+                name: '懷錶 (手錶)',
                 troop: '⚔️ 矛兵 (藍寶石)',
+                badgeColor: '#0284c7',
                 gemColor: '🔵 藍寶',
                 icon: '⌚',
                 gems: [
@@ -5176,8 +5169,36 @@ createApp({
                 ]
             },
             {
+                key: 'jacket',
+                name: '外套 (衣服)',
+                troop: '🛡️ 盾兵 (綠寶石)',
+                badgeColor: '#059669',
+                gemColor: '🟢 綠寶',
+                icon: '🧥',
+                gems: [
+                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: true },
+                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: true },
+                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: true }
+                ]
+            },
+            {
+                key: 'pants',
+                name: '褲子',
+                troop: '🛡️ 盾兵 (綠寶石)',
+                badgeColor: '#059669',
+                gemColor: '🟢 綠寶',
+                icon: '👖',
+                gems: [
+                    { id: 1, name: '寶石 1', currentId: 4, targetId: 4, enabled: true },
+                    { id: 2, name: '寶石 2', currentId: 4, targetId: 4, enabled: true },
+                    { id: 3, name: '寶石 3', currentId: 4, targetId: 4, enabled: true }
+                ]
+            },
+            {
+                key: 'ring',
                 name: '戒指',
-                troop: '🏹 射手 (琥珀寶石)',
+                troop: '🏹 弓兵 (琥珀寶石)',
+                badgeColor: '#d97706',
                 gemColor: '🟡 琥珀寶',
                 icon: '💍',
                 gems: [
@@ -5187,8 +5208,10 @@ createApp({
                 ]
             },
             {
+                key: 'cane',
                 name: '手杖',
-                troop: '🏹 射手 (琥珀寶石)',
+                troop: '🏹 弓兵 (琥珀寶石)',
+                badgeColor: '#d97706',
                 gemColor: '🟡 琥珀寶',
                 icon: '🦯',
                 gems: [
@@ -5199,6 +5222,40 @@ createApp({
             }
         ]
 
+        // 智慧正規化 gemSlots，相容舊版存檔順序 (衣服/褲子/冠冕/懷錶/戒指/手杖)
+        const normalizeGemSlots = (rawList) => {
+            const defaults = defaultGemSlots()
+            if (!Array.isArray(rawList) || rawList.length === 0) return defaults
+            
+            const findSavedSlot = (key) => {
+                return rawList.find(s => {
+                    if (s && s.key && s.key === key) return true
+                    const n = (s && s.name) || ''
+                    if (key === 'hat' && (n.includes('帽') || n.includes('冠'))) return true
+                    if (key === 'watch' && (n.includes('錶') || n.includes('表'))) return true
+                    if (key === 'jacket' && (n.includes('衣') || n.includes('外套'))) return true
+                    if (key === 'pants' && n.includes('褲')) return true
+                    if (key === 'ring' && n.includes('戒')) return true
+                    if (key === 'cane' && (n.includes('杖') || n.includes('仗'))) return true
+                    return false
+                })
+            }
+
+            return defaults.map((defSlot) => {
+                const saved = findSavedSlot(defSlot.key)
+                if (saved && Array.isArray(saved.gems)) {
+                    saved.gems.forEach((g, idx) => {
+                        if (defSlot.gems[idx]) {
+                            if (g.currentId !== undefined) defSlot.gems[idx].currentId = g.currentId
+                            if (g.targetId !== undefined) defSlot.gems[idx].targetId = g.targetId
+                            if (g.enabled !== undefined) defSlot.gems[idx].enabled = g.enabled
+                        }
+                    })
+                }
+                return defSlot
+            })
+        }
+
         const savedGemMode = localStorage.getItem('wos_gem_mode')
         const gemMode = ref(savedGemMode || 'quick')
         watch(gemMode, (v) => {
@@ -5206,7 +5263,13 @@ createApp({
         })
 
         const savedGemSlots = localStorage.getItem('wos_gem_slots')
-        const gemSlots = ref(savedGemSlots ? JSON.parse(savedGemSlots) : defaultGemSlots())
+        let initialGemSlots = defaultGemSlots()
+        if (savedGemSlots) {
+            try {
+                initialGemSlots = normalizeGemSlots(JSON.parse(savedGemSlots))
+            } catch(e){}
+        }
+        const gemSlots = ref(initialGemSlots)
         watch(gemSlots, (v) => {
             try { localStorage.setItem('wos_gem_slots', JSON.stringify(v)) } catch(e){}
         }, { deep: true })
@@ -5231,9 +5294,9 @@ createApp({
                 let enableSlot = false
                 if (type === 'all') enableSlot = true
                 else if (type === 'none') enableSlot = false
-                else if (type === 'infantry') enableSlot = (sIdx === 0 || sIdx === 1)
-                else if (type === 'lancer') enableSlot = (sIdx === 2 || sIdx === 3)
-                else if (type === 'marksman') enableSlot = (sIdx === 4 || sIdx === 5)
+                else if (type === 'lancer') enableSlot = slot.key === 'hat' || slot.key === 'watch' || sIdx === 0 || sIdx === 1
+                else if (type === 'infantry') enableSlot = slot.key === 'jacket' || slot.key === 'pants' || sIdx === 2 || sIdx === 3
+                else if (type === 'marksman') enableSlot = slot.key === 'ring' || slot.key === 'cane' || sIdx === 4 || sIdx === 5
                 if (slot.gems) slot.gems.forEach(g => g.enabled = enableSlot)
             })
         }
@@ -5381,18 +5444,7 @@ createApp({
             if (typeof d.autoConvertTome === 'boolean') autoConvertTome.value = d.autoConvertTome
             if (d.gemMode) gemMode.value = d.gemMode
             if (d.gemSlots && Array.isArray(d.gemSlots)) {
-                gemSlots.value.forEach((slot, idx) => {
-                    if (d.gemSlots[idx] && Array.isArray(d.gemSlots[idx].gems)) {
-                        slot.gems.forEach((g, gIdx) => {
-                            const savedG = d.gemSlots[idx].gems[gIdx]
-                            if (savedG) {
-                                if (savedG.currentId !== undefined) g.currentId = savedG.currentId
-                                if (savedG.targetId !== undefined) g.targetId = savedG.targetId
-                                if (savedG.enabled !== undefined) g.enabled = savedG.enabled
-                            }
-                        })
-                    }
-                })
+                gemSlots.value = normalizeGemSlots(d.gemSlots)
             }
         }
 
